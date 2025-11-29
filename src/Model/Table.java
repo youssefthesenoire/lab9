@@ -2,27 +2,32 @@ package Model;
 
 import Database.CSVDatabaseManager;
 
-import java.util.ArrayList;
-
 public class Table {
-    private Row[] rows ;
+    private Row[] rows;
     private Box[] boxes;
     private Column[] columns;
     private static Table table;
-    private Table()
-    {
+    
+    private Table(String filePath) {
         rows = new Row[9];
         columns = new Column[9];
         boxes = new Box[9];
-        CSVDatabaseManager.loadData(boxes,rows,columns);
+        for(int i = 0; i < 9; i++) {
+            rows[i] = new Row();
+            columns[i] = new Column();
+        }
+        CSVDatabaseManager.loadData(boxes, rows, columns, filePath);
     }
-    public static Table getTable()
-    {
-        if(table == null)
-        {
-            table = new Table();
+    
+    public static Table getTable(String filePath) {
+        if(table == null) {
+            table = new Table(filePath);
         }
         return table;
+    }
+    
+    public static void resetTable() {
+        table = null;
     }
 
     public Row[] getRows() {
