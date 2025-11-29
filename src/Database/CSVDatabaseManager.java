@@ -1,29 +1,55 @@
 package Database;
 
 import java.io.FileReader;
-import com.opencsv.CSVReader;
 
+import Model.Box;
+import Model.Column;
+import Model.Row;
+import com.opencsv.CSVReader;
 public class CSVDatabaseManager {
 
-    public static void readDataLineByLine(String file)
+    public static void loadData(Box[] boxes ,Row[] rows,Column[] columns)
     {
         try {
-
-            // Create an object of filereader
-            // class with CSV file as a parameter.
-            FileReader filereader = new FileReader(file);
-
-            // create csvReader object passing
-            // file reader as a parameter
+            FileReader filereader = new FileReader("Data/file.csv");
             CSVReader csvReader = new CSVReader(filereader);
             String[] nextRecord;
-
-            // we are going to read data line by line
-            while ((nextRecord = csvReader.readNext()) != null) {
-                for (String cell : nextRecord) {
-                    System.out.print(cell + "\t");
+            int counter=0;
+            int [][]elements= new int[9][9];
+            while ((nextRecord = csvReader.readNext()) != null&&(counter<9)) {
+                for(int j=0;j<9;j++)
+                {
+                    elements[counter][j] = Integer.parseInt(nextRecord[j]);
                 }
-                System.out.println();
+                counter++;
+            }
+            for(int i=0;i<9;i++)
+            {
+                int[] r = new int[9];
+                int[] c = new int [9];
+                for(int j=0;j<9;j++)
+                {
+                   r[j] = elements[i][j];
+                   c[j] = elements[j][i];
+                }
+                rows[i].setRowElements(r);
+                columns[i].setcolumnElements(c);
+            }
+            for(int i=0;i<3;i++)
+            {
+                for(int j=0;j<3;j++)
+                {
+                    int[] b = new int[9];
+                    int count=0;
+                    for(int k = i*3;k<i*3+3;k++)
+                        for(int t = j*3;t<j*3+3;t++)
+                        {
+                            b[count++] = elements[k][t];
+                        }
+                    int boxIndex = i*3+j;
+                    boxes[boxIndex] = new Box(i*3, j*3);;
+                    boxes[boxIndex].setBoxElements(b);
+                }
             }
         }
         catch (Exception e) {
