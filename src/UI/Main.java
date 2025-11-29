@@ -83,45 +83,46 @@ public class Main {
                 System.out.println("Valid");
             } else {
                 System.out.println("Invalid");
+                for (int i = 0; i < r.length; i++) {
+                    out.append("Row" + (i + 1) + "," + o + ",[");
+                    int[] rowElements = r[i].getRowElements();
+                    for (int j = 0; j < rowElements.length; j++) {
+                        out.append(rowElements[j]);
+                        if (j < rowElements.length - 1) {
+                            out.append(",");
+                        }
+                    }
+                    out.append("]\n");
+                }
+                out.append("------------------------------------------------------------\n");
+                for (int i = 0; i < c.length; i++) {
+                    out.append("Column" + (i + 1) + "," + o + ",[");
+                    int[] columnElements = c[i].getcolumnElements();
+                    for (int j = 0; j < columnElements.length; j++) {
+                        out.append(columnElements[j]);
+                        if (j < columnElements.length - 1) {
+                            out.append(",");
+                        }
+                    }
+                    out.append("]\n"); // newline after each column
+                }
+                out.append("------------------------------------------------------------\n");
+                for (int i = 0; i < b.length; i++) {
+                    out.append("Box" + (i + 1) + "," + o + ",[");
+                    int[] boxElements = b[i].getBoxElements();
+                    for (int j = 0; j < b.length; j++) {
+                        out.append(boxElements[j]);
+                        if (j < boxElements.length - 1) {
+                            out.append(",");
+                        }
+                    }
+                    out.append("]\n");
+
+                }
 
             }
 
-            for (int i = 0; i < r.length; i++) {
-                out.append("Row" + (i + 1) + "," + o + ",[");
-                int[] rowElements = r[i].getRowElements();
-                for (int j = 0; j < rowElements.length; j++) {
-                    out.append(rowElements[j]);
-                    if (j < rowElements.length - 1) {
-                        out.append(",");
-                    }
-                }
-                out.append("]\n");
-            }
-            out.append("------------------------------------------------------------\n");
-            for (int i = 0; i < c.length; i++) {
-                out.append("Column" + (i + 1) + "," + o + ",[");
-                int[] columnElements = c[i].getcolumnElements();
-                for (int j = 0; j < columnElements.length; j++) {
-                    out.append(columnElements[j]);
-                    if (j < columnElements.length - 1) {
-                        out.append(",");
-                    }
-                }
-                out.append("]\n"); // newline after each column
-            }
-            out.append("------------------------------------------------------------\n");
-            for (int i = 0; i < b.length; i++) {
-                out.append("Box" + (i + 1) + "," + o + ",[");
-                int[] boxElements = b[i].getBoxElements();
-                for (int j = 0; j < b.length; j++) {
-                    out.append(boxElements[j]);
-                    if (j < boxElements.length - 1) {
-                        out.append(",");
-                    }
-                }
-                out.append("]\n");
 
-            }
 
             System.out.println(out);
         }
