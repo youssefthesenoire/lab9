@@ -8,8 +8,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class Mode_Zero {
-    public static ValidationResult validate() {
-        Table table = Table.getTable();
+    public static ValidationResult validate(Table table) {
+        //Table table = Table.getTable();
         Set<LocationOnBox> duplicateLocations = new HashSet<>();
         boolean isValid = true;
         

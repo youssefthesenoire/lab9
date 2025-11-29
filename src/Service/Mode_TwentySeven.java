@@ -11,8 +11,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class Mode_TwentySeven {
-    public static ValidationResult validate() {
-        Table table = Table.getTable();
+    public static ValidationResult validate(Table table) {
+        //Table table = Table.getTable();
         Set<LocationOnBox> duplicateLocations = Collections.newSetFromMap(new ConcurrentHashMap<>());
         ExecutorService executor = Executors.newFixedThreadPool(27);
         
