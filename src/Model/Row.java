@@ -5,8 +5,8 @@ import java.util.HashMap;
 
 public class Row {
     private int[] rowElements;
-    public Row()
-    {
+    
+    public Row() {
         this.rowElements = new int[9];
     }
 
@@ -17,18 +17,28 @@ public class Row {
     public void setRowElements(int[] rowElements) {
         this.rowElements = rowElements;
     }
-    public HashMap<Integer,ArrayList<Integer>> getDuplicatedRow()
-    {
-        HashMap<Integer,ArrayList<Integer>> dup = new HashMap<>();
-        for(int i=0;i<8;i++)
-        {
+    
+    public HashMap<Integer, ArrayList<Integer>> getDuplicatedRow() {
+        HashMap<Integer, ArrayList<Integer>> dup = new HashMap<>();
+        for(int i = 0; i < 9; i++) {
             int number = rowElements[i];
             if(number == 0) continue;
             if(!dup.containsKey(number))
-                dup.put(number,new ArrayList<Integer>());
+                dup.put(number, new ArrayList<Integer>());
             dup.get(number).add(i);
         }
-        dup.entrySet().removeIf(e -> e.getValue().size()==1);
+        dup.entrySet().removeIf(e -> e.getValue().size() == 1);
         return dup;
+    }
+    
+    public boolean isValidRow() {
+        boolean[] seen = new boolean[10];
+        for(int i = 0; i < 9; i++) {
+            int num = rowElements[i];
+            if(num < 1 || num > 9) return false;
+            if(seen[num]) return false;
+            seen[num] = true;
+        }
+        return true;
     }
 }
