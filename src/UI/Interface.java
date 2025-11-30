@@ -162,7 +162,7 @@ public class Interface extends JFrame {
         }
 
         if (!v.isValid()) {
-            ArrayList<LocationOnBox> lb = (ArrayList<LocationOnBox>) v.getDuplicateLocations();
+            ArrayList<LocationOnBox> lb =  v.getDuplicateLocations();
             for (LocationOnBox l : lb) {
                 int r = l.getX();
                 int c = l.getY();

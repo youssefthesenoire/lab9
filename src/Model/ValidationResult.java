@@ -1,12 +1,14 @@
 package Model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ValidationResult {
     private final boolean valid;
-    private final List<LocationOnBox> duplicateLocations;
+    private final ArrayList<LocationOnBox> duplicateLocations;
+
     
-    public ValidationResult(boolean valid, List<LocationOnBox> duplicateLocations) {
+    public ValidationResult(boolean valid, ArrayList<LocationOnBox> duplicateLocations) {
         this.valid = valid;
         this.duplicateLocations = duplicateLocations;
 
@@ -18,7 +20,7 @@ public class ValidationResult {
         return valid;
     }
     
-    public List<LocationOnBox> getDuplicateLocations() {
+    public ArrayList<LocationOnBox> getDuplicateLocations() {
         return duplicateLocations;
     }
 }

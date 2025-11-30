@@ -11,7 +11,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-public class Mode_Three {
+public class Mode_Three implements Interface {
     public static ValidationResult validate(Table table) {
 //        Table table = Table.getTable();
         Set<LocationOnBox> duplicateLocations = Collections.newSetFromMap(new ConcurrentHashMap<>());

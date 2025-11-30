@@ -5,7 +5,7 @@ import Service.Mode_Three;
 import Service.Mode_TwentySeven;
 import Service.Mode_Zero;
 
-import java.util.ArrayList;
+import java.util.*;
 
 public class Main {
     public static void main(String[] args) {
@@ -55,20 +55,20 @@ public class Main {
 
 
         ValidationResult v = null;
-        String o="null";
+        String o = "null";
 
         switch (mode) {
             case "Method0":
                 v = Mode_Zero.validate(t);
-                o = "#1";
+
                 break;
             case "Method3":
                 v = Mode_Three.validate(t);
-                o = "#2";
+
                 break;
             case "Method27":
                 v = Mode_TwentySeven.validate(t);
-                o = "#3";
+
                 break;
             default:
                 System.out.println("Unknown mode: " + mode);
@@ -77,54 +77,107 @@ public class Main {
                 return;
         }
         StringBuilder out = new StringBuilder();
+        ArrayList<LocationOnBox> l = v.getDuplicateLocations();
 
+
+//Print Results
         if (v != null) {
             if (v.isValid()) {
                 System.out.println("Valid");
             } else {
                 System.out.println("Invalid");
+                //Print Dup Rows
+
                 for (int i = 0; i < r.length; i++) {
-                    out.append("Row" + (i + 1) + "," + o + ",[");
-                    int[] rowElements = r[i].getRowElements();
-                    for (int j = 0; j < rowElements.length; j++) {
-                        out.append(rowElements[j]);
-                        if (j < rowElements.length - 1) {
-                            out.append(",");
+                    HashMap<Integer, ArrayList<Integer>> dup = r[i].getDuplicatedRow();
+                    if (dup != null) {
+
+                        for (Map.Entry<Integer, ArrayList<Integer>> entry : dup.entrySet()) {
+                            int number = entry.getKey();
+                            ArrayList<Integer> positions = entry.getValue();
+                            out.append("Row " + (i + 1) + ", #" + number + ", [");
+
+                            // Get positions one by one
+                            for (int j = 0; j < positions.size(); j++) {
+                                out.append(positions.get(j) + 1); // convert to 1-based column
+                                if (j != positions.size() - 1) {
+                                    out.append(",");
+                                }
+
+                            }
+
                         }
+                        out.append("]\n");
+
                     }
-                    out.append("]\n");
                 }
-                out.append("------------------------------------------------------------\n");
+
+                    out.append("------------------------------------------------------------\n");
+                //Print Dup Columns
                 for (int i = 0; i < c.length; i++) {
-                    out.append("Column" + (i + 1) + "," + o + ",[");
-                    int[] columnElements = c[i].getcolumnElements();
-                    for (int j = 0; j < columnElements.length; j++) {
-                        out.append(columnElements[j]);
-                        if (j < columnElements.length - 1) {
-                            out.append(",");
+                    HashMap<Integer, ArrayList<Integer>> dup = c[i].getDuplicatedColumn();
+                    if (dup != null) {
+
+                        for (Map.Entry<Integer, ArrayList<Integer>> entry : dup.entrySet()) {
+                            int number = entry.getKey();
+                            ArrayList<Integer> positions = entry.getValue();
+                            out.append("Column " + (i + 1) + ", #" + number + ", [");
+
+                            // Get positions one by one
+                            for (int j = 0; j < positions.size(); j++) {
+                                out.append(positions.get(j) + 1); // convert to 1-based column
+                                if (j != positions.size() - 1) {
+                                    out.append(",");
+                                }
+
+                            }
+
                         }
+                        out.append("]\n");
+
                     }
-                    out.append("]\n"); // newline after each column
-                }
-                out.append("------------------------------------------------------------\n");
-                for (int i = 0; i < b.length; i++) {
-                    out.append("Box" + (i + 1) + "," + o + ",[");
-                    int[] boxElements = b[i].getBoxElements();
-                    for (int j = 0; j < b.length; j++) {
-                        out.append(boxElements[j]);
-                        if (j < boxElements.length - 1) {
-                            out.append(",");
-                        }
-                    }
-                    out.append("]\n");
+
+
 
                 }
+
+
+                    out.append("------------------------------------------------------------\n");
+                //Print Dup Boxes
+                for (int i = 0; i < b.length; i++) {
+                    HashMap<Integer, ArrayList<LocationOnBox>> dup = b[i].getDuplicatedBox();
+                    if (dup != null && !dup.isEmpty()) {
+
+                        for (Map.Entry<Integer, ArrayList<LocationOnBox>> entry : dup.entrySet()) {
+                            int number = entry.getKey();
+                            ArrayList<LocationOnBox> positions = entry.getValue();
+
+                            out.append("Box " + (i + 1) + ", #" + number + ", [");
+
+                            for (int j = 0; j < positions.size(); j++) {
+                                int x = positions.get(j).getY();
+                                int y = positions.get(j).getX();
+
+                                int localIndex = (y % 3) * 3 + (x % 3); // position inside the box 0–8
+                                out.append(localIndex + 1); // convert to 1-based if you like
+
+                                if (j != positions.size() - 1) {
+                                    out.append(",");
+                                }
+                            }
+
+                            out.append("]\n"); // close each number
+                        }
+
+                    }
+                }
+
 
             }
 
 
-
-            System.out.println(out);
+                System.out.println(out);
+            }
         }
     }
-}
+
