@@ -90,7 +90,7 @@ public class Main {
 
                 for (int i = 0; i < r.length; i++) {
                     HashMap<Integer, ArrayList<Integer>> dup = r[i].getDuplicatedRow();
-                    if (dup != null) {
+                    if (dup != null&&!dup.isEmpty()) {
 
                         for (Map.Entry<Integer, ArrayList<Integer>> entry : dup.entrySet()) {
                             int number = entry.getKey();
@@ -116,7 +116,7 @@ public class Main {
                 //Print Dup Columns
                 for (int i = 0; i < c.length; i++) {
                     HashMap<Integer, ArrayList<Integer>> dup = c[i].getDuplicatedColumn();
-                    if (dup != null) {
+                    if (dup != null&&!dup.isEmpty()) {
 
                         for (Map.Entry<Integer, ArrayList<Integer>> entry : dup.entrySet()) {
                             int number = entry.getKey();
