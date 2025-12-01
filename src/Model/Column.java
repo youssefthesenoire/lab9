@@ -30,15 +30,4 @@ public class Column {
         dup.entrySet().removeIf(e -> e.getValue().size() == 1);
         return dup;
     }
-    
-    public boolean isValidColumn() {
-        boolean[] seen = new boolean[10];
-        for(int i = 0; i < 9; i++) {
-            int num = columnElements[i];
-            if(num < 1 || num > 9) return false;
-            if(seen[num]) return false;
-            seen[num] = true;
-        }
-        return true;
-    }
 }

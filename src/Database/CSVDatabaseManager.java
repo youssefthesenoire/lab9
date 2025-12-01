@@ -14,7 +14,6 @@ public class CSVDatabaseManager {
             String[] nextRecord;
             int counter = 0;
             int[][] elements = new int[9][9];
-            
             while ((nextRecord = csvReader.readNext()) != null && counter < 9) {
                 for(int j = 0; j < 9; j++) {
                     elements[counter][j] = Integer.parseInt(nextRecord[j].trim());

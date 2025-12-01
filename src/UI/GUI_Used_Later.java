@@ -1,6 +1,6 @@
 package UI;
 
-import Model.LocationOnBox;
+import Model.LocationOnBoard;
 import Model.Table;
 import Model.ValidationResult;
 import Service.Mode_Three;
@@ -8,15 +8,13 @@ import Service.Mode_TwentySeven;
 import Service.Mode_Zero;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.JTableHeader;
 import java.awt.*;
 import java.io.File;
 import java.util.ArrayList;
 
-public class Interface extends JFrame {
+public class GUI_Used_Later extends JFrame {
     private JTable sudokuTable;
     private DefaultTableModel tableModel;
     private JComboBox<String> methodComboBox;
@@ -28,7 +26,7 @@ public class Interface extends JFrame {
     Mode_Three mode3 = new Mode_Three();
     ValidationResult v;
 
-    public Interface() {
+    public GUI_Used_Later() {
         initializeGUI();
     }
 
@@ -162,8 +160,8 @@ public class Interface extends JFrame {
         }
 
         if (!v.isValid()) {
-            ArrayList<LocationOnBox> lb =  v.getDuplicateLocations();
-            for (LocationOnBox l : lb) {
+            ArrayList<LocationOnBoard> lb =  v.getDuplicateLocations();
+            for (LocationOnBoard l : lb) {
                 int r = l.getX();
                 int c = l.getY();
                 int b = (r / 3) * 3 + (c / 3);

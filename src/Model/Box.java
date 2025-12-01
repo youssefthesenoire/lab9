@@ -19,9 +19,9 @@ public class Box {
     public void setBoxElements(int[] boxElements) {
         this.boxElements = boxElements;
     }
-    public HashMap<Integer,ArrayList<LocationOnBox>> getDuplicatedBox()
+    public HashMap<Integer,ArrayList<LocationOnBoard>> getDuplicatedBox()
     {
-        HashMap<Integer,ArrayList<LocationOnBox>> dup = new HashMap<>();
+        HashMap<Integer,ArrayList<LocationOnBoard>> dup = new HashMap<>();
         for(int i=0;i<9;i++)
         {
             int number = boxElements[i];
@@ -30,7 +30,7 @@ public class Box {
             int c = sCol + i%3;
             if(!dup.containsKey(number))
                 dup.put(number,new ArrayList<>());
-            dup.get(number).add(new LocationOnBox(r,c));
+            dup.get(number).add(new LocationOnBoard(r,c));
         }
         dup.entrySet().removeIf(e -> e.getValue().size()==1);
         return dup;

@@ -7,10 +7,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
-public class Mode_Zero implements Interface {
+public class Mode_Zero implements Validation {
     public static ValidationResult validate(Table table) {
-        //Table table = Table.getTable();
-        Set<LocationOnBox> duplicateLocations = new HashSet<>();
+        Set<LocationOnBoard> duplicateLocations = new HashSet<>();
         boolean isValid = true;
         
         for(int i = 0; i < 9; i++) {
@@ -18,7 +17,7 @@ public class Mode_Zero implements Interface {
             for(int num : rowDup.keySet()) {
                 ArrayList<Integer> columns = rowDup.get(num);
                 for(int col : columns) {
-                    duplicateLocations.add(new LocationOnBox(i, col));
+                    duplicateLocations.add(new LocationOnBoard(i, col));
                     isValid = false;
                 }
             }
@@ -29,16 +28,16 @@ public class Mode_Zero implements Interface {
             for(int num : colDup.keySet()) {
                 ArrayList<Integer> rows = colDup.get(num);
                 for(int row : rows) {
-                    duplicateLocations.add(new LocationOnBox(row, i));
+                    duplicateLocations.add(new LocationOnBoard(row, i));
                     isValid = false;
                 }
             }
         }
         
         for(Box box : table.getBoxes()) {
-            HashMap<Integer, ArrayList<LocationOnBox>> boxDup = box.getDuplicatedBox();
+            HashMap<Integer, ArrayList<LocationOnBoard>> boxDup = box.getDuplicatedBox();
             for(int num : boxDup.keySet()) {
-                ArrayList<LocationOnBox> locations = boxDup.get(num);
+                ArrayList<LocationOnBoard> locations = boxDup.get(num);
                 duplicateLocations.addAll(locations);
                 isValid = false;
             }

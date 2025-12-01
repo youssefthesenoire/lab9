@@ -13,9 +13,8 @@ public class Main {
             System.out.println("Usage: java -jar MyApp.jar <csv-file> <mode>");
             return;
         }
-
-        String csvPath = args[0];  // first argument
-        String mode = args[1];     // second argument
+        String csvPath = args[0];
+        String mode = args[1];
 //        String path = "C:\\Users\\ahmed\\Desktop\\New Text Document (2).csv";
         System.out.println("CSV Path: " + csvPath);
         System.out.println("Mode: " + mode);
@@ -77,7 +76,7 @@ public class Main {
                 return;
         }
         StringBuilder out = new StringBuilder();
-        ArrayList<LocationOnBox> l = v.getDuplicateLocations();
+        ArrayList<LocationOnBoard> l = v.getDuplicateLocations();
 
 
 //Print Results
@@ -116,41 +115,36 @@ public class Main {
                 //Print Dup Columns
                 for (int i = 0; i < c.length; i++) {
                     HashMap<Integer, ArrayList<Integer>> dup = c[i].getDuplicatedColumn();
+<<<<<<< Updated upstream
                     if (dup != null&&!dup.isEmpty()) {
 
+=======
+                    if (dup != null) {
+>>>>>>> Stashed changes
                         for (Map.Entry<Integer, ArrayList<Integer>> entry : dup.entrySet()) {
                             int number = entry.getKey();
                             ArrayList<Integer> positions = entry.getValue();
                             out.append("Column " + (i + 1) + ", #" + number + ", [");
-
                             // Get positions one by one
                             for (int j = 0; j < positions.size(); j++) {
                                 out.append(positions.get(j) + 1); // convert to 1-based column
                                 if (j != positions.size() - 1) {
                                     out.append(",");
                                 }
-
                             }
-
                         }
                         out.append("]\n");
-
                     }
-
-
-
                 }
-
-
                     out.append("------------------------------------------------------------\n");
                 //Print Dup Boxes
                 for (int i = 0; i < b.length; i++) {
-                    HashMap<Integer, ArrayList<LocationOnBox>> dup = b[i].getDuplicatedBox();
+                    HashMap<Integer, ArrayList<LocationOnBoard>> dup = b[i].getDuplicatedBox();
                     if (dup != null && !dup.isEmpty()) {
 
-                        for (Map.Entry<Integer, ArrayList<LocationOnBox>> entry : dup.entrySet()) {
+                        for (Map.Entry<Integer, ArrayList<LocationOnBoard>> entry : dup.entrySet()) {
                             int number = entry.getKey();
-                            ArrayList<LocationOnBox> positions = entry.getValue();
+                            ArrayList<LocationOnBoard> positions = entry.getValue();
 
                             out.append("Box " + (i + 1) + ", #" + number + ", [");
 
@@ -165,17 +159,11 @@ public class Main {
                                     out.append(",");
                                 }
                             }
-
                             out.append("]\n"); // close each number
                         }
-
                     }
                 }
-
-
             }
-
-
                 System.out.println(out);
             }
         }

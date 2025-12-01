@@ -10,10 +10,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-public class Mode_TwentySeven implements Interface {
+public class Mode_TwentySeven implements Validation {
     public static ValidationResult validate(Table table) {
-        //Table table = Table.getTable();
-        Set<LocationOnBox> duplicateLocations = Collections.newSetFromMap(new ConcurrentHashMap<>());
+        Set<LocationOnBoard> duplicateLocations = Collections.newSetFromMap(new ConcurrentHashMap<>());
         ExecutorService executor = Executors.newFixedThreadPool(27);
         
         for(int i = 0; i < 9; i++) {
@@ -34,25 +33,25 @@ public class Mode_TwentySeven implements Interface {
         return new ValidationResult(isValid, new ArrayList<>(duplicateLocations));
     }
     
-    private static void validateRow(Row row, int rowIndex, Set<LocationOnBox> duplicates) {
+    private static void validateRow(Row row, int rowIndex, Set<LocationOnBoard> duplicates) {
         var rowDup = row.getDuplicatedRow();
         for(var entry : rowDup.entrySet()) {
             for(int col : entry.getValue()) {
-                duplicates.add(new LocationOnBox(rowIndex, col));
+                duplicates.add(new LocationOnBoard(rowIndex, col));
             }
         }
     }
     
-    private static void validateColumn(Column column, int colIndex, Set<LocationOnBox> duplicates) {
+    private static void validateColumn(Column column, int colIndex, Set<LocationOnBoard> duplicates) {
         var colDup = column.getDuplicatedColumn();
         for(var entry : colDup.entrySet()) {
             for(int row : entry.getValue()) {
-                duplicates.add(new LocationOnBox(row, colIndex));
+                duplicates.add(new LocationOnBoard(row, colIndex));
             }
         }
     }
     
-    private static void validateBox(Box box, Set<LocationOnBox> duplicates) {
+    private static void validateBox(Box box, Set<LocationOnBoard> duplicates) {
         var boxDup = box.getDuplicatedBox();
         for(var entry : boxDup.entrySet()) {
             duplicates.addAll(entry.getValue());
