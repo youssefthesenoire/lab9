@@ -89,16 +89,13 @@ public class Main {
 
                 for (int i = 0; i < r.length; i++) {
                     HashMap<Integer, ArrayList<Integer>> dup = r[i].getDuplicatedRow();
-                    if (dup != null&&!dup.isEmpty()) {
-
+                    if (dup != null && !dup.isEmpty()) {
                         for (Map.Entry<Integer, ArrayList<Integer>> entry : dup.entrySet()) {
                             int number = entry.getKey();
                             ArrayList<Integer> positions = entry.getValue();
                             out.append("Row " + (i + 1) + ", #" + number + ", [");
-
-                            // Get positions one by one
                             for (int j = 0; j < positions.size(); j++) {
-                                out.append(positions.get(j) + 1); // convert to 1-based column
+                                out.append(positions.get(j) + 1);
                                 if (j != positions.size() - 1) {
                                     out.append(",");
                                 }
@@ -111,25 +108,22 @@ public class Main {
                     }
                 }
 
-                    out.append("------------------------------------------------------------\n");
+                out.append("------------------------------------------------------------\n");
                 //Print Dup Columns
                 for (int i = 0; i < c.length; i++) {
                     HashMap<Integer, ArrayList<Integer>> dup = c[i].getDuplicatedColumn();
-<<<<<<< Updated upstream
-                    if (dup != null&&!dup.isEmpty()) {
-
-=======
-                    if (dup != null) {
->>>>>>> Stashed changes
-                        for (Map.Entry<Integer, ArrayList<Integer>> entry : dup.entrySet()) {
-                            int number = entry.getKey();
-                            ArrayList<Integer> positions = entry.getValue();
-                            out.append("Column " + (i + 1) + ", #" + number + ", [");
-                            // Get positions one by one
-                            for (int j = 0; j < positions.size(); j++) {
-                                out.append(positions.get(j) + 1); // convert to 1-based column
-                                if (j != positions.size() - 1) {
-                                    out.append(",");
+                    if (dup != null && !dup.isEmpty()) {
+                        if (dup != null) {
+                            for (Map.Entry<Integer, ArrayList<Integer>> entry : dup.entrySet()) {
+                                int number = entry.getKey();
+                                ArrayList<Integer> positions = entry.getValue();
+                                out.append("Column " + (i + 1) + ", #" + number + ", [");
+                                // Get positions one by one
+                                for (int j = 0; j < positions.size(); j++) {
+                                    out.append(positions.get(j) + 1);
+                                    if (j != positions.size() - 1) {
+                                        out.append(",");
+                                    }
                                 }
                             }
                         }
@@ -137,35 +131,34 @@ public class Main {
                     }
                 }
                     out.append("------------------------------------------------------------\n");
-                //Print Dup Boxes
-                for (int i = 0; i < b.length; i++) {
-                    HashMap<Integer, ArrayList<LocationOnBoard>> dup = b[i].getDuplicatedBox();
-                    if (dup != null && !dup.isEmpty()) {
+                    //Print Dup Boxes
+                    for (int i = 0; i < b.length; i++) {
+                        HashMap<Integer, ArrayList<LocationOnBoard>> dup = b[i].getDuplicatedBox();
+                        if (dup != null && !dup.isEmpty()) {
 
-                        for (Map.Entry<Integer, ArrayList<LocationOnBoard>> entry : dup.entrySet()) {
-                            int number = entry.getKey();
-                            ArrayList<LocationOnBoard> positions = entry.getValue();
+                            for (Map.Entry<Integer, ArrayList<LocationOnBoard>> entry : dup.entrySet()) {
+                                int number = entry.getKey();
+                                ArrayList<LocationOnBoard> positions = entry.getValue();
 
-                            out.append("Box " + (i + 1) + ", #" + number + ", [");
+                                out.append("Box " + (i + 1) + ", #" + number + ", [");
 
-                            for (int j = 0; j < positions.size(); j++) {
-                                int x = positions.get(j).getY();
-                                int y = positions.get(j).getX();
+                                for (int j = 0; j < positions.size(); j++) {
+                                    int x = positions.get(j).getY();
+                                    int y = positions.get(j).getX();
 
-                                int localIndex = (y % 3) * 3 + (x % 3); // position inside the box 0–8
-                                out.append(localIndex + 1); // convert to 1-based if you like
+                                    int localIndex = (y % 3) * 3 + (x % 3); // position inside the box 0–8
+                                    out.append(localIndex + 1); // convert to 1-based if you like
 
-                                if (j != positions.size() - 1) {
-                                    out.append(",");
+                                    if (j != positions.size() - 1) {
+                                        out.append(",");
+                                    }
                                 }
+                                out.append("]\n"); // close each number
                             }
-                            out.append("]\n"); // close each number
                         }
                     }
                 }
-            }
                 System.out.println(out);
             }
         }
     }
-
