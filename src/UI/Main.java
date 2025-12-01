@@ -118,7 +118,6 @@ public class Main {
                                 int number = entry.getKey();
                                 ArrayList<Integer> positions = entry.getValue();
                                 out.append("Column " + (i + 1) + ", #" + number + ", [");
-                                // Get positions one by one
                                 for (int j = 0; j < positions.size(); j++) {
                                     out.append(positions.get(j) + 1);
                                     if (j != positions.size() - 1) {
@@ -146,14 +145,14 @@ public class Main {
                                     int x = positions.get(j).getY();
                                     int y = positions.get(j).getX();
 
-                                    int localIndex = (y % 3) * 3 + (x % 3); // position inside the box 0–8
-                                    out.append(localIndex + 1); // convert to 1-based if you like
+                                    int localIndex = (y % 3) * 3 + (x % 3);
+                                    out.append(localIndex + 1);
 
                                     if (j != positions.size() - 1) {
                                         out.append(",");
                                     }
                                 }
-                                out.append("]\n"); // close each number
+                                out.append("]\n");
                             }
                         }
                     }
