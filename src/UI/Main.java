@@ -113,7 +113,7 @@ public class Main {
                 for (int i = 0; i < c.length; i++) {
                     HashMap<Integer, ArrayList<Integer>> dup = c[i].getDuplicatedColumn();
                     if (dup != null && !dup.isEmpty()) {
-                        if (dup != null) {
+
                             for (Map.Entry<Integer, ArrayList<Integer>> entry : dup.entrySet()) {
                                 int number = entry.getKey();
                                 ArrayList<Integer> positions = entry.getValue();
@@ -125,7 +125,7 @@ public class Main {
                                         out.append(",");
                                     }
                                 }
-                            }
+
                         }
                         out.append("]\n");
                     }
