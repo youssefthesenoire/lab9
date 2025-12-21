@@ -306,7 +306,6 @@ public class SudokuGUI extends JPanel {
                         JOptionPane.INFORMATION_MESSAGE);
 
                 gameController.deleteCompletedGame(currentGame);
-                returnToMainMenu();
             } else {
                 JOptionPane.showMessageDialog(this,
                         "<html><div style='text-align: center;'>" +
