@@ -14,6 +14,9 @@ public class MusicPlayer {
     public MusicPlayer() {
         // Constructor - no auto start
     }
+    public boolean isPlaying() {
+        return currentClip != null && currentClip.isRunning();
+    }
     public static void checkMusicFiles() throws IOException {
         String[] files = {START_MUSIC, INGAME_MUSIC, SUCCESS_MUSIC};
         for (String fileName : files) {

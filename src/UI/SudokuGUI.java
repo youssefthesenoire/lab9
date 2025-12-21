@@ -159,6 +159,7 @@ public class SudokuGUI extends JPanel {
         controlPanel.add(verifyButton);
         controlPanel.add(solveButton);
         controlPanel.add(undoButton);
+        controlPanel.add(createMusicButton());
         controlPanel.add(newGameButton);
         controlPanel.add(mainMenuButton);
         return controlPanel;
@@ -546,6 +547,28 @@ public class SudokuGUI extends JPanel {
                 "Save",
                 JOptionPane.INFORMATION_MESSAGE);
     }
+    private JButton createMusicButton() {
+        JButton musicToggleButton = new JButton(musicEnabled ? "🔊" : "🔇");
+        musicToggleButton.setFont(new Font("Arial", Font.PLAIN, 12));
+        musicToggleButton.setPreferredSize(new Dimension(40, 25));
+        musicToggleButton.setFocusPainted(false);
+        musicToggleButton.setToolTipText("Toggle Music");
+
+        musicToggleButton.addActionListener(e -> {
+            if (musicPlayer != null) {
+                if (musicPlayer.isPlaying()) {
+                    musicPlayer.stopMusic();
+                    musicToggleButton.setText("🔇");
+                } else {
+                    musicPlayer.playInGameMusic();
+                    musicToggleButton.setText("🔊");
+                }
+            }
+        });
+
+        return musicToggleButton;
+    }
+
 
     public boolean hasUnsavedChanges() {
         return hasUnsavedChanges;
