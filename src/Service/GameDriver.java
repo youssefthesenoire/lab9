@@ -1,9 +1,9 @@
 package Service;
 
+import Exceptions.SolutionInvalidException;
 import Model.*;
 import java.io.*;
 import java.util.List;
-
 public class GameDriver {
     private RandomPairs randomPairs;
     private String basePath = "games";

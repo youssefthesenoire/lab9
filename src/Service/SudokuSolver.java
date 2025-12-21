@@ -1,5 +1,6 @@
 package Service;
 
+import Exceptions.InvalidGameException;
 import Model.*;
 import java.util.ArrayList;
 import java.util.Iterator;

@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 
 public class SequentialVerifier {
+
     public static VerificationResult verify(int[][] board) {
         List<LocationOnBoard> duplicates = new ArrayList<>();
         boolean hasEmptyCells = false;
