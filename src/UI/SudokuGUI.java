@@ -33,7 +33,6 @@ public class SudokuGUI extends JPanel {
     private JButton undoButton;
     private JButton newGameButton;
     private JButton mainMenuButton;
-    private JButton hintButton;
 
     private boolean hasUnsavedChanges = false;
     private Map<String, Color> boxColors = new HashMap<>();
@@ -113,9 +112,7 @@ public class SudokuGUI extends JPanel {
         JButton button = new JButton();
         button.setFont(new Font("Arial", Font.BOLD, 20));
         button.setFocusPainted(false);
-
         Color boxColor = getBoxColor(row, col);
-
         int top = (row % 3 == 0) ? 3 : 1;
         int left = (col % 3 == 0) ? 3 : 1;
         int bottom = (row == 8 || (row + 1) % 3 == 0) ? 3 : 1;
@@ -144,35 +141,26 @@ public class SudokuGUI extends JPanel {
         JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
         controlPanel.setBackground(new Color(240, 240, 245));
         controlPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
-        verifyButton = createStyledButton("✅ VERIFY", new Color(50, 150, 50));
-        solveButton = createStyledButton("🔍 SOLVE", new Color(50, 100, 200));
-        undoButton = createStyledButton("↩ UNDO", new Color(200, 150, 50));
-        hintButton = createStyledButton("💡 HINT", new Color(150, 100, 200));
-        newGameButton = createStyledButton("🔄 NEW GAME", new Color(100, 100, 100));
-        mainMenuButton = createStyledButton("🏠 MAIN MENU", new Color(200, 100, 50));
-
+        verifyButton = createStyledButton("VERIFY", new Color(50, 150, 50));
+        solveButton = createStyledButton("SOLVE", new Color(50, 100, 200));
+        undoButton = createStyledButton("UNDO", new Color(200, 150, 50));
+        newGameButton = createStyledButton("NEW GAME", new Color(100, 100, 100));
+        mainMenuButton = createStyledButton("MAIN MENU", new Color(200, 100, 50));
         verifyButton.addActionListener(e -> verifyBoard());
         solveButton.addActionListener(e -> solveGame());
         undoButton.addActionListener(e -> undoMove());
-        hintButton.addActionListener(e -> showHint());
         newGameButton.addActionListener(e -> newGame());
         mainMenuButton.addActionListener(e -> returnToMainMenu());
-
         verifyButton.setToolTipText("Verify current board");
         solveButton.setToolTipText("Solve puzzle (available when exactly 5 cells empty)");
         undoButton.setToolTipText("Undo last move");
-        hintButton.setToolTipText("Get a hint for an empty cell");
         newGameButton.setToolTipText("Start a new game");
         mainMenuButton.setToolTipText("Return to main menu");
-
         controlPanel.add(verifyButton);
         controlPanel.add(solveButton);
         controlPanel.add(undoButton);
-        controlPanel.add(hintButton);
         controlPanel.add(newGameButton);
         controlPanel.add(mainMenuButton);
-
         return controlPanel;
     }
 
@@ -180,15 +168,12 @@ public class SudokuGUI extends JPanel {
         JPanel infoPanel = new JPanel(new BorderLayout());
         infoPanel.setBackground(new Color(220, 220, 230));
         infoPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
-
         String difficulty = currentGame.getDifficulty() != null ?
                 currentGame.getDifficulty().toString() : "Unfinished";
         JLabel difficultyLabel = new JLabel("Difficulty: " + difficulty);
         difficultyLabel.setFont(new Font("Arial", Font.BOLD, 14));
-
         JLabel emptyCellsLabel = new JLabel("Empty cells: " + currentGame.getEmptyCellCount());
         emptyCellsLabel.setFont(new Font("Arial", Font.PLAIN, 14));
-
         infoPanel.add(difficultyLabel, BorderLayout.WEST);
         infoPanel.add(emptyCellsLabel, BorderLayout.EAST);
 
@@ -205,7 +190,6 @@ public class SudokuGUI extends JPanel {
                 BorderFactory.createRaisedBevelBorder(),
                 BorderFactory.createEmptyBorder(8, 15, 8, 15)
         ));
-
         button.addMouseListener(new MouseAdapter() {
             public void mouseEntered(MouseEvent evt) {
                 button.setBackground(color.brighter());
@@ -236,7 +220,6 @@ public class SudokuGUI extends JPanel {
                         JOptionPane.WARNING_MESSAGE);
                 return;
             }
-
             Object[] possibilities = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "Clear"};
             String selected = (String)JOptionPane.showInputDialog(
                     SudokuGUI.this,
@@ -247,7 +230,6 @@ public class SudokuGUI extends JPanel {
                     possibilities,
                     currentGame.getBoard()[row][col] == 0 ? "1" : String.valueOf(currentGame.getBoard()[row][col])
             );
-
             if(selected != null) {
                 try {
                     int value = selected.equals("Clear") ? 0 : Integer.parseInt(selected);
@@ -256,11 +238,9 @@ public class SudokuGUI extends JPanel {
                     if(value == previousValue) {
                         return;
                     }
-
                     currentGame.setCellValue(row, col, value);
                     updateBoardDisplay();
                     hasUnsavedChanges = true;
-
                     UserAction userAction = new UserAction(row, col, value, previousValue);
                     try {
                         controller.logUserAction(userAction);
@@ -270,7 +250,6 @@ public class SudokuGUI extends JPanel {
                                 "Warning",
                                 JOptionPane.WARNING_MESSAGE);
                     }
-
                     gameController.saveCurrentGame(currentGame);
                     updateSolveButtonState();
 
@@ -320,7 +299,7 @@ public class SudokuGUI extends JPanel {
 
                 JOptionPane.showMessageDialog(this,
                         "<html><div style='text-align: center;'>" +
-                                "<h1 style='color: green;'>🎉 CONGRATULATIONS!</h1>" +
+                                "<h1 style='color: green;'>CONGRATULATIONS!</h1>" +
                                 "<p style='font-size: 14pt;'>The Sudoku is <b>COMPLETE</b> and <b>VALID</b>!</p>" +
                                 "</div></html>",
                         "Game Complete",
@@ -331,7 +310,7 @@ public class SudokuGUI extends JPanel {
             } else {
                 JOptionPane.showMessageDialog(this,
                         "<html><div style='text-align: center;'>" +
-                                "<h3 style='color: blue;'>✅ Board is Valid</h3>" +
+                                "<h3 style='color: blue;'>Board is Valid</h3>" +
                                 "<p>But still incomplete.</p>" +
                                 "<p>Empty cells remaining: <b>" + currentGame.getEmptyCellCount() + "</b></p>" +
                                 "</div></html>",
@@ -342,7 +321,7 @@ public class SudokuGUI extends JPanel {
             // Board has invalid cells
             StringBuilder message = new StringBuilder();
             message.append("<html><div style='text-align: center;'>");
-            message.append("<h2 style='color: red;'>❌ Board is Invalid</h2>");
+            message.append("<h2 style='color: red;'>Board is Invalid</h2>");
             message.append("<p>Duplicate values found at cells:</p>");
             message.append("<p><b>");
 
@@ -390,7 +369,7 @@ public class SudokuGUI extends JPanel {
         if(currentGame.getEmptyCellCount() != 5) {
             JOptionPane.showMessageDialog(this,
                     "<html><div style='text-align: center;'>" +
-                            "<h3 style='color: orange;'>⚠ Cannot Solve</h3>" +
+                            "<h3 style='color: orange;'>Cannot Solve</h3>" +
                             "<p>Solve feature is only available when exactly 5 cells are empty.</p>" +
                             "<p>Current empty cells: <b>" + currentGame.getEmptyCellCount() + "</b></p>" +
                             "</div></html>",
@@ -426,7 +405,7 @@ public class SudokuGUI extends JPanel {
 
                 JOptionPane.showMessageDialog(this,
                         "<html><div style='text-align: center;'>" +
-                                "<h3 style='color: green;'>✅ Puzzle Solved!</h3>" +
+                                "<h3 style='color: green;'>Puzzle Solved!</h3>" +
                                 "<p>All cells have been filled correctly.</p>" +
                                 "</div></html>",
                         "Solved",
@@ -486,7 +465,7 @@ public class SudokuGUI extends JPanel {
             updateSolveButtonState();
 
             JOptionPane.showMessageDialog(this,
-                    "↩ Last move undone",
+                    "Last move undone",
                     "Undo",
                     JOptionPane.INFORMATION_MESSAGE);
 
@@ -496,68 +475,6 @@ public class SudokuGUI extends JPanel {
                     "Undo Error",
                     JOptionPane.ERROR_MESSAGE);
         }
-    }
-
-    private void showHint() {
-        List<int[]> emptyCells = new ArrayList<>();
-        for(int row = 0; row < 9; row++) {
-            for(int col = 0; col < 9; col++) {
-                if(currentGame.getBoard()[row][col] == 0 && !currentGame.isFixedCell(row, col)) {
-                    emptyCells.add(new int[]{row, col});
-                }
-            }
-        }
-
-        if(emptyCells.isEmpty()) {
-            JOptionPane.showMessageDialog(this,
-                    "No empty cells to give hints for!",
-                    "Hint",
-                    JOptionPane.INFORMATION_MESSAGE);
-            return;
-        }
-
-        Random random = new Random();
-        int[] cell = emptyCells.get(random.nextInt(emptyCells.size()));
-        int row = cell[0];
-        int col = cell[1];
-
-        flashCell(row, col);
-
-        JOptionPane.showMessageDialog(this,
-                "<html><div style='text-align: center;'>" +
-                        "<h3>💡 Hint</h3>" +
-                        "<p>Try focusing on cell: <b>(" + (row+1) + ", " + (col+1) + ")</b></p>" +
-                        "</div></html>",
-                "Hint",
-                JOptionPane.INFORMATION_MESSAGE);
-    }
-
-    private void flashCell(int row, int col) {
-        Color originalColor = cellButtons[row][col].getBackground();
-
-        Timer timer = new Timer(200, new ActionListener() {
-            private int flashCount = 0;
-            private final int MAX_FLASHES = 3;
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (flashCount >= MAX_FLASHES * 2) {
-                    ((Timer)e.getSource()).stop();
-                    cellButtons[row][col].setBackground(originalColor);
-                    return;
-                }
-
-                if (flashCount % 2 == 0) {
-                    cellButtons[row][col].setBackground(Color.YELLOW);
-                } else {
-                    cellButtons[row][col].setBackground(originalColor);
-                }
-
-                flashCount++;
-            }
-        });
-
-        timer.start();
     }
 
     private void newGame() {

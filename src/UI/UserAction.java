@@ -12,23 +12,18 @@ public class UserAction {
         this.value = value;
         this.previousValue = previousValue;
     }
-
     public int getRow() {
         return row;
     }
-
     public int getCol() {
         return col;
     }
-
     public int getValue() {
         return value;
     }
-
     public int getPreviousValue() {
         return previousValue;
     }
-
     @Override
     public String toString() {
         return "(" + row + ", " + col + ", " + value + ", " + previousValue + ")";
