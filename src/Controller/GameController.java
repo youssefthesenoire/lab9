@@ -6,13 +6,13 @@ import Service.*;
 import Exceptions.*;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.util.*;
+import java.util.List;
+import java.util.Random;
 
 public class GameController implements Viewable {
     private Game currentGame;
     private final GameDriver gameDriver;
-    private final String logFilePath = "games/current/log.txt";
+    private final String basePath = "games";
 
     public GameController() {
         this.gameDriver = new GameDriver();
@@ -27,28 +27,56 @@ public class GameController implements Viewable {
 
     @Override
     public Game getGame(Difficulty level) throws NotFoundException {
-        File folder = new File("games/" + level.toString().toLowerCase());
-        File[] files = folder.listFiles();
+        File folder = new File(basePath + "/" + level.toString().toLowerCase());
+        File[] files = folder.listFiles((dir, name) -> name.endsWith(".csv"));
 
         if(files == null || files.length == 0) {
             throw new NotFoundException("No games found for difficulty: " + level);
         }
 
+        // Return a random game from the folder
         Random random = new Random();
         File selectedFile = files[random.nextInt(files.length)];
 
-        int[][] board = loadBoardFromFile(selectedFile);
-        Game game = new Game(board, level);
-        this.currentGame = game;
-        saveCurrentGame(board);
+        try {
+            int[][] board = loadBoardFromFile(selectedFile);
+            Game game = new Game(board, level);
+            this.currentGame = game;
 
-        return game;
+            // Copy to current folder for incomplete state tracking
+            gameDriver.copyGameToCurrent(board);
+            initializeLogFile();
+
+            return game;
+        } catch (IOException e) {
+            throw new NotFoundException("Error loading game: " + e.getMessage(), e);
+        }
     }
 
     @Override
     public void driveGames(Game sourceGame) throws SolutionInvalidException {
-        // Implementation would generate games from source solution
-        throw new UnsupportedOperationException("Not implemented yet");
+        // Actually, this method should load from a file path
+        // But based on the interface, it takes a Game object
+        // The ControllerFacade handles the conversion
+
+        // Verify the source solution first
+        VerificationResult result = SequentialVerifier.verify(sourceGame.getBoard());
+
+        if(result.getState() != GameState.VALID) {
+            throw new SolutionInvalidException(
+                    "Source solution is " + result.getState() +
+                            ". Must be a fully valid Sudoku board.");
+        }
+
+        // Generate three difficulty levels
+        gameDriver.generateGamesFromValidBoard(sourceGame.getBoard());
+    }
+
+    // Add a helper method for direct file path loading
+    public void driveGamesFromFile(String filePath) throws SolutionInvalidException, IOException {
+        int[][] board = loadBoardFromFile(new File(filePath));
+        Game sourceGame = new Game(board, null);
+        driveGames(sourceGame);
     }
 
     @Override
@@ -57,10 +85,19 @@ public class GameController implements Viewable {
 
         switch(result.getState()) {
             case VALID:
-                if(game.isComplete()) {
-                    deleteCompletedGame(game);
+                // Check if complete (no empty cells)
+                boolean hasEmpty = false;
+                int[][] board = game.getBoard();
+                for(int i = 0; i < 9; i++) {
+                    for(int j = 0; j < 9; j++) {
+                        if(board[i][j] == 0) {
+                            hasEmpty = true;
+                            break;
+                        }
+                    }
+                    if(hasEmpty) break;
                 }
-                return "valid";
+                return hasEmpty ? "incomplete" : "valid";
 
             case INCOMPLETE:
                 return "incomplete";
@@ -79,110 +116,132 @@ public class GameController implements Viewable {
 
     @Override
     public int[] solveGame(Game game) throws InvalidGameException {
-        try {
-            return SudokuSolver.solve(game);
-        } catch (Exception e) {
-            throw new InvalidGameException("Failed to solve game: " + e.getMessage(), e);
+        if(game.getEmptyCellCount() != 5) {
+            throw new InvalidGameException("Solver only works for exactly 5 empty cells");
         }
+
+        return SudokuSolver.solve(game);
     }
 
     @Override
     public void logUserAction(String userAction) throws IOException {
-        File logFile = new File(logFilePath);
-        if(!logFile.getParentFile().exists()) {
-            logFile.getParentFile().mkdirs();
+        File logFile = new File(basePath + "/current/log.txt");
+        File parentDir = logFile.getParentFile();
+        if(!parentDir.exists()) {
+            parentDir.mkdirs();
         }
 
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(logFilePath, true))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(logFile, true))) {
             writer.write(userAction);
             writer.newLine();
         }
     }
 
-    private boolean checkUnfinishedGame() {
-        File currentFolder = new File("games/current");
-        File gameFile = new File(currentFolder, "game.csv");
-        File logFile = new File(currentFolder, "log.txt");
+    @Override
+    public void saveCurrentGame(Game game) {
+        if(game != null) {
+            gameDriver.saveCurrentGame(game.getBoard());
+        }
+    }
 
-        return gameFile.exists() && logFile.exists();
+    @Override
+    public void deleteCompletedGame(Game game) {
+        // Only delete from difficulty folder if the game has a difficulty
+        if(game.getDifficulty() != null) {
+            String difficultyFolderPath = basePath + "/" + game.getDifficulty().toString().toLowerCase();
+            File difficultyFolder = new File(difficultyFolderPath);
+            if(difficultyFolder.exists() && difficultyFolder.isDirectory()) {
+                File[] files = difficultyFolder.listFiles();
+                if(files != null && files.length > 0) {
+                    // Delete the first game in the folder
+                    files[0].delete();
+                }
+            }
+        }
+
+        // Always delete from current folder
+        gameDriver.deleteCurrentGame();
+    }
+
+    private boolean checkUnfinishedGame() {
+        File currentFolder = new File(basePath + "/current");
+        if(!currentFolder.exists()) {
+            return false;
+        }
+
+        File gameFile = new File(currentFolder, "game.csv");
+        return gameFile.exists() && gameFile.length() > 0;
     }
 
     private boolean checkAllDifficultyGamesExist() {
-        File easyFolder = new File("games/easy");
-        File mediumFolder = new File("games/medium");
-        File hardFolder = new File("games/hard");
+        File easyFolder = new File(basePath + "/easy");
+        File mediumFolder = new File(basePath + "/medium");
+        File hardFolder = new File(basePath + "/hard");
 
-        return easyFolder.exists() && easyFolder.list() != null && easyFolder.list().length > 0 &&
-                mediumFolder.exists() && mediumFolder.list() != null && mediumFolder.list().length > 0 &&
-                hardFolder.exists() && hardFolder.list() != null && hardFolder.list().length > 0;
+        boolean easyExists = easyFolder.exists() && easyFolder.isDirectory() &&
+                easyFolder.listFiles((dir, name) -> name.endsWith(".csv")) != null &&
+                easyFolder.listFiles((dir, name) -> name.endsWith(".csv")).length > 0;
+
+        boolean mediumExists = mediumFolder.exists() && mediumFolder.isDirectory() &&
+                mediumFolder.listFiles((dir, name) -> name.endsWith(".csv")) != null &&
+                mediumFolder.listFiles((dir, name) -> name.endsWith(".csv")).length > 0;
+
+        boolean hardExists = hardFolder.exists() && hardFolder.isDirectory() &&
+                hardFolder.listFiles((dir, name) -> name.endsWith(".csv")) != null &&
+                hardFolder.listFiles((dir, name) -> name.endsWith(".csv")).length > 0;
+
+        return easyExists && mediumExists && hardExists;
     }
 
-    private int[][] loadBoardFromFile(File file) {
+    private int[][] loadBoardFromFile(File file) throws IOException {
         int[][] board = new int[9][9];
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader(file));
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
             int row = 0;
-            while((line = reader.readLine()) != null && row < 9) {
+
+            while ((line = reader.readLine()) != null && row < 9) {
+                // Handle empty lines
+                if(line.trim().isEmpty()) {
+                    continue;
+                }
+
                 String[] values = line.split(",");
-                for(int col = 0; col < 9 && col < values.length; col++) {
-                    board[row][col] = Integer.parseInt(values[col].trim());
+                for (int col = 0; col < 9 && col < values.length; col++) {
+                    String val = values[col].trim();
+                    board[row][col] = val.isEmpty() ? 0 : Integer.parseInt(val);
                 }
                 row++;
             }
-            reader.close();
-        } catch (IOException | NumberFormatException e) {
-            e.printStackTrace();
-            // Return empty board on error
-            for(int i = 0; i < 9; i++) {
-                Arrays.fill(board[i], 0);
-            }
+        } catch (NumberFormatException e) {
+            throw new IOException("Invalid number format in CSV file: " + file.getName(), e);
         }
+
         return board;
     }
 
-    private void saveCurrentGame(int[][] board) {
-        File currentFolder = new File("games/current");
-        if(!currentFolder.exists()) {
-            currentFolder.mkdirs();
+    public Game loadUnfinishedGame() throws NotFoundException, IOException {
+        File gameFile = new File(basePath + "/current/game.csv");
+        if(!gameFile.exists() || gameFile.length() == 0) {
+            throw new NotFoundException("No unfinished game found");
         }
 
-        File gameFile = new File(currentFolder, "game.csv");
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(gameFile))) {
-            for(int i = 0; i < 9; i++) {
-                for(int j = 0; j < 9; j++) {
-                    writer.write(String.valueOf(board[i][j]));
-                    if(j < 8) writer.write(",");
-                }
-                writer.newLine();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        int[][] board = loadBoardFromFile(gameFile);
+        Game game = new Game(board, null);
+        this.currentGame = game;
+        return game;
+    }
+
+    private void initializeLogFile() {
+        File logFile = new File(basePath + "/current/log.txt");
+        if(logFile.exists()) {
+            logFile.delete();
         }
     }
 
-    private void deleteCompletedGame(Game game) {
-        // Delete from difficulty folder
-        File difficultyFolder = new File("games/" + game.getDifficulty().toString().toLowerCase());
-        if(difficultyFolder.exists()) {
-            // Find and delete the corresponding game file
-            File[] files = difficultyFolder.listFiles();
-            if(files != null) {
-                for(File file : files) {
-                    // Simple approach: delete one file (could be enhanced to find exact match)
-                    file.delete();
-                    break;
-                }
-            }
-        }
-
-        // Delete current game
-        File currentFolder = new File("games/current");
-        File[] currentFiles = currentFolder.listFiles();
-        if(currentFiles != null) {
-            for(File file : currentFiles) {
-                file.delete();
-            }
-        }
+    // Helper method for GUI
+    public boolean[] getCatalogAsBooleans() {
+        Catalog catalog = getCatalog();
+        return new boolean[]{catalog.isHasUnfinished(), catalog.isAllModesExist()};
     }
 }

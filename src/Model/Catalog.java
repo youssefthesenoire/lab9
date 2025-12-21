@@ -13,15 +13,7 @@ public class Catalog {
         return hasUnfinished;
     }
 
-    public void setHasUnfinished(boolean hasUnfinished) {
-        this.hasUnfinished = hasUnfinished;
-    }
-
     public boolean isAllModesExist() {
         return allModesExist;
-    }
-
-    public void setAllModesExist(boolean allModesExist) {
-        this.allModesExist = allModesExist;
     }
 }

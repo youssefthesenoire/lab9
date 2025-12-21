@@ -6,7 +6,7 @@ import java.io.IOException;
 public interface Controllable {
     boolean[] getCatalog();
     int[][] getGame(char level) throws NotFoundException;
-    void driveGames(String sourcePath) throws SolutionInvalidException;
+    void driveGames(String sourcePath) throws SolutionInvalidException, IOException;
     boolean[][] verifyGame(int[][] game);
     int[][] solveGame(int[][] game) throws InvalidGameException;
     void logUserAction(UI.UserAction userAction) throws IOException;

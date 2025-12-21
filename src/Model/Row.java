@@ -5,7 +5,7 @@ import java.util.HashMap;
 
 public class Row {
     private int[] rowElements;
-    
+
     public Row() {
         this.rowElements = new int[9];
     }
@@ -17,7 +17,7 @@ public class Row {
     public void setRowElements(int[] rowElements) {
         this.rowElements = rowElements;
     }
-    
+
     public HashMap<Integer, ArrayList<Integer>> getDuplicatedRow() {
         HashMap<Integer, ArrayList<Integer>> dup = new HashMap<>();
         for(int i = 0; i < 9; i++) {

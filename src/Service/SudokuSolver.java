@@ -1,88 +1,80 @@
 package Service;
 
-import Exceptions.InvalidGameException;
 import Model.*;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import Exceptions.InvalidGameException;
+
+import java.util.*;
 
 public class SudokuSolver {
-    // Flyweight: Shared board structure
-    private static class BoardFlyweight {
-        private final int[][] fixedCells;
+    // Flyweight Pattern: BoardContext represents the fixed parts
+    private static class BoardContext {
+        private final int[][] board;
         private final List<EmptyCell> emptyCells;
-        
-        public BoardFlyweight(int[][] board) {
-            this.fixedCells = new int[9][9];
+
+        public BoardContext(int[][] board) {
+            this.board = board;
             this.emptyCells = new ArrayList<>();
-            
-            // Initialize fixed cells and identify empty cells
+
+            // Identify empty cells
             for(int i = 0; i < 9; i++) {
                 for(int j = 0; j < 9; j++) {
                     if(board[i][j] == 0) {
                         emptyCells.add(new EmptyCell(i, j));
-                    } else {
-                        fixedCells[i][j] = board[i][j];
                     }
                 }
             }
-            
+
             if(emptyCells.size() != 5) {
                 throw new IllegalArgumentException("Solver works only for exactly 5 empty cells");
             }
         }
-        
-        public int getValue(int row, int col, int[] combination) {
-            // Check if this cell is empty
-            for(int i = 0; i < emptyCells.size(); i++) {
-                EmptyCell cell = emptyCells.get(i);
-                if(cell.row == row && cell.col == col) {
-                    return combination[i];
-                }
-            }
-            return fixedCells[row][col];
-        }
-        
+
         public List<EmptyCell> getEmptyCells() {
             return emptyCells;
         }
+
+        public int getValue(int row, int col) {
+            return board[row][col];
+        }
     }
-    
+
     private static class EmptyCell {
         final int row;
         final int col;
-        
+
         EmptyCell(int row, int col) {
             this.row = row;
             this.col = col;
         }
     }
-    
-    // Iterator Pattern: Generate all permutations
-    private static class CombinationIterator implements Iterator<int[]> {
+
+    // Iterator Pattern: Generate permutations on-the-fly
+    private static class PermutationIterator implements Iterator<int[]> {
         private final int size;
         private final int[] current;
         private boolean hasNext;
-        
-        public CombinationIterator(int size) {
+
+        public PermutationIterator(int size) {
             this.size = size;
             this.current = new int[size];
-            for(int i = 0; i < size; i++) {
-                current[i] = 1; // Start with all 1s
-            }
+            Arrays.fill(current, 1);
             this.hasNext = true;
         }
-        
+
         @Override
         public boolean hasNext() {
             return hasNext;
         }
-        
+
         @Override
         public int[] next() {
+            if(!hasNext) {
+                throw new NoSuchElementException();
+            }
+
             int[] result = current.clone();
-            
-            // Generate next combination (like counting in base 9)
+
+            // Generate next permutation
             int i = size - 1;
             while(i >= 0) {
                 if(current[i] < 9) {
@@ -93,88 +85,64 @@ public class SudokuSolver {
                     i--;
                 }
             }
-            
-            // Check if we've generated all combinations (9^size)
+
             if(i < 0) {
                 hasNext = false;
             }
-            
+
             return result;
         }
     }
-    
+
     public static int[] solve(Game game) throws InvalidGameException {
         if(game.getEmptyCellCount() != 5) {
             throw new InvalidGameException("Solver only works for exactly 5 empty cells");
         }
-        
-        BoardFlyweight flyweight = new BoardFlyweight(game.getBoard());
-        CombinationIterator iterator = new CombinationIterator(5);
-        
+
+        // Create flyweight context
+        BoardContext context = new BoardContext(game.getBoard());
+        PermutationIterator iterator = new PermutationIterator(5);
+
+        // Try each permutation
         while(iterator.hasNext()) {
             int[] combination = iterator.next();
-            
-            // Verify this combination
-            if(isValidCombination(flyweight, combination)) {
-                // Return solution encoded as specified: x*81 + y*9 + (value-1)
-                return encodeSolution(flyweight.getEmptyCells(), combination);
+
+            if(isValidCombination(context, combination)) {
+                return encodeSolution(context.getEmptyCells(), combination);
             }
         }
-        
-        throw new InvalidGameException("No solution found");
+
+        throw new InvalidGameException("No solution found for the board");
     }
-    
-    private static boolean isValidCombination(BoardFlyweight flyweight, int[] combination) {
-        // Create a verifier that uses the flyweight
-        for(int row = 0; row < 9; row++) {
-            boolean[] seen = new boolean[10];
-            for(int col = 0; col < 9; col++) {
-                int value = flyweight.getValue(row, col, combination);
-                if(value != 0 && seen[value]) {
-                    return false;
-                }
-                seen[value] = true;
+
+    private static boolean isValidCombination(BoardContext context, int[] combination) {
+        // Create a temporary array for validation
+        int[][] tempBoard = new int[9][9];
+
+        // Copy fixed values
+        for(int i = 0; i < 9; i++) {
+            for(int j = 0; j < 9; j++) {
+                tempBoard[i][j] = context.getValue(i, j);
             }
         }
-        
-        // Check columns
-        for(int col = 0; col < 9; col++) {
-            boolean[] seen = new boolean[10];
-            for(int row = 0; row < 9; row++) {
-                int value = flyweight.getValue(row, col, combination);
-                if(value != 0 && seen[value]) {
-                    return false;
-                }
-                seen[value] = true;
-            }
+
+        // Fill with combination
+        List<EmptyCell> emptyCells = context.getEmptyCells();
+        for(int i = 0; i < emptyCells.size(); i++) {
+            EmptyCell cell = emptyCells.get(i);
+            tempBoard[cell.row][cell.col] = combination[i];
         }
-        
-        // Check boxes
-        for(int boxRow = 0; boxRow < 3; boxRow++) {
-            for(int boxCol = 0; boxCol < 3; boxCol++) {
-                boolean[] seen = new boolean[10];
-                for(int i = 0; i < 3; i++) {
-                    for(int j = 0; j < 3; j++) {
-                        int row = boxRow * 3 + i;
-                        int col = boxCol * 3 + j;
-                        int value = flyweight.getValue(row, col, combination);
-                        if(value != 0 && seen[value]) {
-                            return false;
-                        }
-                        seen[value] = true;
-                    }
-                }
-            }
-        }
-        
-        return true;
+
+        // Validate the board
+        VerificationResult result = SequentialVerifier.verify(tempBoard);
+        return result.getState() == GameState.VALID;
     }
-    
+
     private static int[] encodeSolution(List<EmptyCell> emptyCells, int[] combination) {
+        // Encode as: row * 81 + col * 9 + (value - 1)
         int[] encoded = new int[emptyCells.size()];
         for(int i = 0; i < emptyCells.size(); i++) {
             EmptyCell cell = emptyCells.get(i);
-            // Encode as: x * 81 + y * 9 + (value - 1)
             encoded[i] = cell.row * 81 + cell.col * 9 + (combination[i] - 1);
         }
         return encoded;

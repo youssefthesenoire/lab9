@@ -7,11 +7,10 @@ import java.util.HashMap;
 import java.util.List;
 
 public class SequentialVerifier {
-
     public static VerificationResult verify(int[][] board) {
         List<LocationOnBoard> duplicates = new ArrayList<>();
         boolean hasEmptyCells = false;
-        
+
         // Check rows
         for(int row = 0; row < 9; row++) {
             HashMap<Integer, List<Integer>> rowMap = new HashMap<>();
@@ -26,7 +25,6 @@ public class SequentialVerifier {
                 }
                 rowMap.get(value).add(col);
             }
-            // Add duplicates from this row
             for(var entry : rowMap.entrySet()) {
                 if(entry.getValue().size() > 1) {
                     for(int col : entry.getValue()) {
@@ -35,7 +33,7 @@ public class SequentialVerifier {
                 }
             }
         }
-        
+
         // Check columns
         for(int col = 0; col < 9; col++) {
             HashMap<Integer, List<Integer>> colMap = new HashMap<>();
@@ -47,7 +45,6 @@ public class SequentialVerifier {
                 }
                 colMap.get(value).add(row);
             }
-            // Add duplicates from this column
             for(var entry : colMap.entrySet()) {
                 if(entry.getValue().size() > 1) {
                     for(int row : entry.getValue()) {
@@ -56,7 +53,7 @@ public class SequentialVerifier {
                 }
             }
         }
-        
+
         // Check boxes (3x3)
         for(int boxRow = 0; boxRow < 3; boxRow++) {
             for(int boxCol = 0; boxCol < 3; boxCol++) {
@@ -73,7 +70,6 @@ public class SequentialVerifier {
                         boxMap.get(value).add(new LocationOnBoard(row, col));
                     }
                 }
-                // Add duplicates from this box
                 for(var entry : boxMap.entrySet()) {
                     if(entry.getValue().size() > 1) {
                         duplicates.addAll(entry.getValue());
@@ -81,8 +77,7 @@ public class SequentialVerifier {
                 }
             }
         }
-        
-        // Determine game state
+
         if(!duplicates.isEmpty()) {
             return new VerificationResult(GameState.INVALID, duplicates);
         } else if(hasEmptyCells) {

@@ -17,7 +17,7 @@ public class Column {
     public void setcolumnElements(int[] columnElements) {
         this.columnElements = columnElements;
     }
-    
+
     public HashMap<Integer, ArrayList<Integer>> getDuplicatedColumn() {
         HashMap<Integer, ArrayList<Integer>> dup = new HashMap<>();
         for(int i = 0; i < 9; i++) {

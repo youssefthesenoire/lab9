@@ -7,7 +7,7 @@ public class Table {
     private Box[] boxes;
     private Column[] columns;
     private static Table table;
-    
+
     private Table(String filePath) {
         rows = new Row[9];
         columns = new Column[9];
@@ -18,14 +18,14 @@ public class Table {
         }
         CSVDatabaseManager.loadData(boxes, rows, columns, filePath);
     }
-    
+
     public static Table getTable(String filePath) {
         if(table == null) {
             table = new Table(filePath);
         }
         return table;
     }
-    
+
     public static void resetTable() {
         table = null;
     }
