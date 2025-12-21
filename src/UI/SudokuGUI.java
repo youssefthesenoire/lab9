@@ -548,25 +548,28 @@ public class SudokuGUI extends JPanel {
                 JOptionPane.INFORMATION_MESSAGE);
     }
     private JButton createMusicButton() {
-        JButton musicToggleButton = new JButton(musicEnabled ? "🔊" : "🔇");
-        musicToggleButton.setFont(new Font("Arial", Font.PLAIN, 12));
-        musicToggleButton.setPreferredSize(new Dimension(40, 25));
-        musicToggleButton.setFocusPainted(false);
-        musicToggleButton.setToolTipText("Toggle Music");
+        JButton musicButton = new JButton("Music: " + (musicEnabled ? "ON" : "OFF"));
 
-        musicToggleButton.addActionListener(e -> {
+        musicButton.setFont(new Font("Arial", Font.PLAIN, 12));
+        musicButton.setFocusPainted(false);
+        musicButton.setBackground(new Color(200, 200, 200));
+
+        musicButton.addActionListener(e -> {
+            musicEnabled = !musicEnabled;
             if (musicPlayer != null) {
-                if (musicPlayer.isPlaying()) {
-                    musicPlayer.stopMusic();
-                    musicToggleButton.setText("🔇");
-                } else {
+                if (musicEnabled) {
+                    // Always play starting music when turning on from main menu
                     musicPlayer.playInGameMusic();
-                    musicToggleButton.setText("🔊");
+                } else {
+                    musicPlayer.stopMusic();
                 }
             }
+            musicButton.setText("Music: " + (musicEnabled ? "ON" : "OFF"));
+            musicButton.setBackground(musicEnabled ?
+                    new Color(180, 230, 180) : new Color(200, 200, 200));
         });
 
-        return musicToggleButton;
+        return musicButton;
     }
 
 
