@@ -317,8 +317,22 @@ public class MainGUI extends JFrame {
 
     public void returnToMainMenu() {
         sudokuGUI = null;
+        getContentPane().removeAll();
         showWelcomeScreen();
         setTitle("Sudoku Game");
+        revalidate();
+        repaint();
+
+        if (musicEnabled && musicPlayer != null) {
+            musicPlayer.playStartingMusic();
+        }
+    }
+    public void returnToMainMenuImmediately() {
+        getContentPane().removeAll();
+        showWelcomeScreen();
+        setTitle("Sudoku Game");
+        revalidate();
+        repaint();
 
         if (musicEnabled && musicPlayer != null) {
             musicPlayer.playStartingMusic();

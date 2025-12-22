@@ -121,6 +121,7 @@ public class SudokuGUI extends JPanel {
         button.setBorder(BorderFactory.createMatteBorder(top, left, bottom, right, Color.BLACK));
 
         if(currentGame.isFixedCell(row, col)) {
+            // Fixed cell (preloaded clue)
             button.setBackground(new Color(
                     Math.min(boxColor.getRed() - 30, 255),
                     Math.min(boxColor.getGreen() - 30, 255),
@@ -129,8 +130,13 @@ public class SudokuGUI extends JPanel {
             button.setForeground(Color.BLACK);
             button.setEnabled(false);
         } else {
+            // Editable cell (empty or user-filled)
             button.setBackground(boxColor);
-            button.setForeground(new Color(0, 100, 200));
+            if(currentGame.getBoard()[row][col] != 0) {
+                button.setForeground(new Color(0, 100, 200)); // Blue for user inputs
+            } else {
+                button.setForeground(new Color(0, 100, 200)); // Blue for empty cells
+            }
             button.addActionListener(new CellClickListener(row, col));
         }
 
@@ -214,13 +220,15 @@ public class SudokuGUI extends JPanel {
 
         @Override
         public void actionPerformed(ActionEvent e) {
+            // Check if cell is fixed (preloaded clue)
             if(currentGame.isFixedCell(row, col)) {
                 JOptionPane.showMessageDialog(SudokuGUI.this,
-                        "This cell is fixed and cannot be edited!",
+                        "This cell is a preloaded clue and cannot be edited!",
                         "Fixed Cell",
                         JOptionPane.WARNING_MESSAGE);
                 return;
             }
+
             Object[] possibilities = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "Clear"};
             String selected = (String)JOptionPane.showInputDialog(
                     SudokuGUI.this,
@@ -302,11 +310,19 @@ public class SudokuGUI extends JPanel {
                         "<html><div style='text-align: center;'>" +
                                 "<h1 style='color: green;'>CONGRATULATIONS!</h1>" +
                                 "<p style='font-size: 14pt;'>The Sudoku is <b>COMPLETE</b> and <b>VALID</b>!</p>" +
+                                "<p>All games will be deleted and you will return to the main menu.</p>" +
                                 "</div></html>",
                         "Game Complete",
                         JOptionPane.INFORMATION_MESSAGE);
 
+                // Delete all games
                 gameController.deleteCompletedGame(currentGame);
+
+                // Return to main menu
+                SwingUtilities.invokeLater(() -> {
+                    mainGUI.returnToMainMenu();
+                });
+
             } else {
                 JOptionPane.showMessageDialog(this,
                         "<html><div style='text-align: center;'>" +
@@ -350,7 +366,9 @@ public class SudokuGUI extends JPanel {
         for(int row = 0; row < 9; row++) {
             for(int col = 0; col < 9; col++) {
                 Color boxColor = getBoxColor(row, col);
+
                 if(currentGame.isFixedCell(row, col)) {
+                    // Fixed cell (preloaded clue)
                     cellButtons[row][col].setBackground(new Color(
                             Math.min(boxColor.getRed() - 30, 255),
                             Math.min(boxColor.getGreen() - 30, 255),
@@ -358,8 +376,13 @@ public class SudokuGUI extends JPanel {
                     ));
                     cellButtons[row][col].setForeground(Color.BLACK);
                 } else {
+                    // Editable cell
                     cellButtons[row][col].setBackground(boxColor);
-                    cellButtons[row][col].setForeground(new Color(0, 100, 200));
+                    if(currentGame.getBoard()[row][col] != 0) {
+                        cellButtons[row][col].setForeground(new Color(0, 100, 200)); // Blue for user inputs
+                    } else {
+                        cellButtons[row][col].setForeground(new Color(0, 100, 200));
+                    }
                 }
             }
         }
@@ -432,7 +455,7 @@ public class SudokuGUI extends JPanel {
         }
 
         try {
-            java.util.List<String> lines = Files.readAllLines(logFile.toPath());
+            List<String> lines = Files.readAllLines(logFile.toPath());
 
             if(lines.isEmpty()) {
                 JOptionPane.showMessageDialog(this,
@@ -454,20 +477,28 @@ public class SudokuGUI extends JPanel {
             int col = Integer.parseInt(parts[1]);
             int previousValue = Integer.parseInt(parts[3]);
 
-            currentGame.setCellValue(row, col, previousValue);
+            // Only allow undo if the cell is not a fixed clue
+            if(!currentGame.isFixedCell(row, col)) {
+                currentGame.setCellValue(row, col, previousValue);
 
-            lines.remove(lines.size() - 1);
-            Files.write(logFile.toPath(), lines);
+                lines.remove(lines.size() - 1);
+                Files.write(logFile.toPath(), lines);
 
-            updateBoardDisplay();
-            gameController.saveCurrentGame(currentGame);
-            hasUnsavedChanges = true;
-            updateSolveButtonState();
+                updateBoardDisplay();
+                gameController.saveCurrentGame(currentGame);
+                hasUnsavedChanges = true;
+                updateSolveButtonState();
 
-            JOptionPane.showMessageDialog(this,
-                    "Last move undone",
-                    "Undo",
-                    JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(this,
+                        "Last move undone",
+                        "Undo",
+                        JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this,
+                        "Cannot undo fixed clue cell",
+                        "Undo Error",
+                        JOptionPane.ERROR_MESSAGE);
+            }
 
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this,
@@ -528,14 +559,14 @@ public class SudokuGUI extends JPanel {
 
     private void updateSolveButtonState() {
         int emptyCells = currentGame.getEmptyCellCount();
-        solveButton.setEnabled(emptyCells == 5);
+        solveButton.setEnabled(emptyCells <= 5);
 
         if(emptyCells == 5) {
             solveButton.setBackground(new Color(0, 180, 0));
             solveButton.setToolTipText("Solve enabled - exactly 5 empty cells");
         } else {
             solveButton.setBackground(new Color(50, 100, 200));
-            solveButton.setToolTipText("Solve disabled - requires exactly 5 empty cells (current: " + emptyCells + ")");
+            solveButton.setToolTipText("Solve disabled - requires  5 empty cells or less (current: " + emptyCells + ")");
         }
     }
 
@@ -547,6 +578,7 @@ public class SudokuGUI extends JPanel {
                 "Save",
                 JOptionPane.INFORMATION_MESSAGE);
     }
+
     private JButton createMusicButton() {
         JButton musicButton = new JButton("Music: " + (musicEnabled ? "ON" : "OFF"));
 
@@ -558,7 +590,6 @@ public class SudokuGUI extends JPanel {
             musicEnabled = !musicEnabled;
             if (musicPlayer != null) {
                 if (musicEnabled) {
-                    // Always play starting music when turning on from main menu
                     musicPlayer.playInGameMusic();
                 } else {
                     musicPlayer.stopMusic();
@@ -571,7 +602,6 @@ public class SudokuGUI extends JPanel {
 
         return musicButton;
     }
-
 
     public boolean hasUnsavedChanges() {
         return hasUnsavedChanges;

@@ -41,6 +41,20 @@ public class Game {
         currentBoard[row][col] = value;
     }
 
+    // Add a method to check if a cell is an original clue (non-zero in initial board)
+    public boolean isOriginalClue(int row, int col) {
+        return initialBoard[row][col] != 0;
+    }
+
+    // Add a method to update fixed cells based on original clues only
+    public void updateFixedCells() {
+        for(int i = 0; i < 9; i++) {
+            for(int j = 0; j < 9; j++) {
+                fixedCells[i][j] = (initialBoard[i][j] != 0);
+            }
+        }
+    }
+
     public int getEmptyCellCount() {
         int count = 0;
         for(int i = 0; i < 9; i++) {
