@@ -283,7 +283,7 @@ public class SudokuGUI extends JPanel {
 
                 // Return to main menu
                 SwingUtilities.invokeLater(() -> {
-                    mainGUI.returnToMainMenu();
+                    mainGUI.showLoadSolvedDialog();
                 });
 
             } else {

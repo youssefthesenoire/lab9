@@ -163,7 +163,7 @@ public class MainGUI extends JFrame {
         }
     }
 
-    private void showLoadSolvedDialog() {
+    public void showLoadSolvedDialog() {
         getContentPane().removeAll();
 
         JPanel loadPanel = new JPanel(new BorderLayout());
