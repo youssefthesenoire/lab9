@@ -42,7 +42,7 @@ public class GameDriver {
         clearFolder("easy");
         clearFolder("medium");
         clearFolder("hard");
-        
+
         generateAndSaveGame(sourceBoard, Difficulty.EASY, 10);
         generateAndSaveGame(sourceBoard, Difficulty.MEDIUM, 20);
         generateAndSaveGame(sourceBoard, Difficulty.HARD, 25);
@@ -61,7 +61,6 @@ public class GameDriver {
     }
 
     private void generateAndSaveGame(int[][] sourceBoard, Difficulty difficulty, int cellsToRemove) {
-        // Create a copy of the source board
         int[][] gameBoard = new int[9][9];
         for(int i = 0; i < 9; i++) {
             System.arraycopy(sourceBoard[i], 0, gameBoard[i], 0, 9);
