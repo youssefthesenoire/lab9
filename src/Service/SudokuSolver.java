@@ -6,7 +6,6 @@ import Exceptions.InvalidGameException;
 import java.util.*;
 
 public class SudokuSolver {
-    // Flyweight Pattern: BoardContext represents the fixed parts
     private static class BoardContext {
         private final int[][] board;
         private final List<EmptyCell> emptyCells;
@@ -48,7 +47,6 @@ public class SudokuSolver {
         }
     }
 
-    // Iterator Pattern: Generate permutations on-the-fly
     private static class PermutationIterator implements Iterator<int[]> {
         private final int size;
         private final int[] current;
@@ -74,7 +72,6 @@ public class SudokuSolver {
 
             int[] result = current.clone();
 
-            // Generate next permutation
             int i = size - 1;
             while(i >= 0) {
                 if(current[i] < 9) {
@@ -99,11 +96,10 @@ public class SudokuSolver {
             throw new InvalidGameException("Solver only works for exactly 5 empty cells");
         }
 
-        // Create flyweight context
         BoardContext context = new BoardContext(game.getBoard());
         PermutationIterator iterator = new PermutationIterator(5);
 
-        // Try each permutation
+
         while(iterator.hasNext()) {
             int[] combination = iterator.next();
 
@@ -116,30 +112,25 @@ public class SudokuSolver {
     }
 
     private static boolean isValidCombination(BoardContext context, int[] combination) {
-        // Create a temporary array for validation
         int[][] tempBoard = new int[9][9];
 
-        // Copy fixed values
         for(int i = 0; i < 9; i++) {
             for(int j = 0; j < 9; j++) {
                 tempBoard[i][j] = context.getValue(i, j);
             }
         }
 
-        // Fill with combination
         List<EmptyCell> emptyCells = context.getEmptyCells();
         for(int i = 0; i < emptyCells.size(); i++) {
             EmptyCell cell = emptyCells.get(i);
             tempBoard[cell.row][cell.col] = combination[i];
         }
 
-        // Validate the board
         VerificationResult result = SequentialVerifier.verify(tempBoard);
         return result.getState() == GameState.VALID;
     }
 
     private static int[] encodeSolution(List<EmptyCell> emptyCells, int[] combination) {
-        // Encode as: row * 81 + col * 9 + (value - 1)
         int[] encoded = new int[emptyCells.size()];
         for(int i = 0; i < emptyCells.size(); i++) {
             EmptyCell cell = emptyCells.get(i);

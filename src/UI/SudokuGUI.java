@@ -217,7 +217,6 @@ public class SudokuGUI extends JPanel {
                     hasUnsavedChanges = true;
                     UserAction userAction = new UserAction(row, col, value, previousValue);
                     try {
-                        // ONLY log the move - don't save the entire board
                         controller.logUserAction(userAction);
                     } catch (IOException ex) {
                         JOptionPane.showMessageDialog(SudokuGUI.this,
@@ -228,20 +227,16 @@ public class SudokuGUI extends JPanel {
                     updateSolveButtonState();
 
                 } catch (NumberFormatException ex) {
-                    // Should not happen with our options
                 }
             }
         }
     }
 
     private void verifyBoard() {
-        // Use the ControllerFacade to get boolean array validation
         boolean[][] cellValidity = controller.verifyGame(currentGame.getBoard());
 
-        // Reset all cells to normal first
         resetAllCellColors();
 
-        // Check if all cells are valid and if board is complete
         boolean allValid = true;
         boolean hasEmpty = false;
         Set<String> invalidCells = new HashSet<>();
@@ -262,7 +257,6 @@ public class SudokuGUI extends JPanel {
 
         if(allValid) {
             if(!hasEmpty) {
-                // Game is complete and valid
                 if (musicEnabled && musicPlayer != null) {
                     try {
                         musicPlayer.playSuccessMusic();
@@ -278,10 +272,8 @@ public class SudokuGUI extends JPanel {
                         "Game Complete",
                         JOptionPane.INFORMATION_MESSAGE);
 
-                // Delete all games
                 gameController.deleteCompletedGame(currentGame);
 
-                // Return to main menu
                 SwingUtilities.invokeLater(() -> {
                     mainGUI.showLoadSolvedDialog();
                 });
@@ -295,7 +287,6 @@ public class SudokuGUI extends JPanel {
                         JOptionPane.INFORMATION_MESSAGE);
             }
         } else {
-            // Board has invalid cells
             StringBuilder message = new StringBuilder();
             message.append("Board is Invalid\n\n");
             message.append("Duplicate values found at cells:\n");
@@ -322,11 +313,9 @@ public class SudokuGUI extends JPanel {
         for(int row = 0; row < 9; row++) {
             for(int col = 0; col < 9; col++) {
                 if(currentGame.isFixedCell(row, col)) {
-                    // Fixed cell (preloaded clue)
                     cellButtons[row][col].setBackground(new Color(240, 240, 240));
                     cellButtons[row][col].setForeground(Color.BLACK);
                 } else {
-                    // Editable cell
                     cellButtons[row][col].setBackground(Color.WHITE);
                     if(currentGame.getBoard()[row][col] != 0) {
                         cellButtons[row][col].setForeground(new Color(0, 100, 200));
@@ -366,12 +355,10 @@ public class SudokuGUI extends JPanel {
                     int value = cell[2];
                     currentGame.setCellValue(row, col, value);
 
-                    // Log each solved cell as a user action
                     UserAction userAction = new UserAction(row, col, value, 0);
                     try {
                         controller.logUserAction(userAction);
                     } catch (IOException ex) {
-                        // Ignore logging errors for solver
                     }
                 }
 
@@ -428,7 +415,6 @@ public class SudokuGUI extends JPanel {
             int col = Integer.parseInt(parts[1]);
             int previousValue = Integer.parseInt(parts[3]);
 
-            // Only allow undo if the cell is not a fixed clue
             if(!currentGame.isFixedCell(row, col)) {
                 currentGame.setCellValue(row, col, previousValue);
 
@@ -470,14 +456,11 @@ public class SudokuGUI extends JPanel {
                     JOptionPane.QUESTION_MESSAGE);
 
             if(response == JOptionPane.YES_OPTION) {
-                // Keep progress (already saved in log) and return
                 mainGUI.returnToMainMenu();
             } else if(response == JOptionPane.NO_OPTION) {
-                // Delete current game files
                 gameController.deleteCurrentGameFiles();
                 mainGUI.returnToMainMenu();
             }
-            // Cancel - do nothing
         } else {
             mainGUI.returnToMainMenu();
         }

@@ -68,7 +68,7 @@ public class GameDriver {
 
         List<int[]> positionsToRemove = randomPairs.generateDistinctPairs(cellsToRemove);
         for(int[] pos : positionsToRemove) {
-            gameBoard[pos[0]][pos[1]] = 0; // Remove cell value
+            gameBoard[pos[0]][pos[1]] = 0;
         }
 
         saveGame(gameBoard, difficulty);
@@ -106,7 +106,6 @@ public class GameDriver {
         }
     }
 
-    // ONLY save the initial board once - never update it
     public void saveInitialBoard(int[][] board) {
         String filePath = basePath + "/current/game.csv";
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
@@ -135,10 +134,8 @@ public class GameDriver {
     }
 
     public void copyGameToCurrent(int[][] board) {
-        // Save ONLY the initial board (never update this file)
         saveInitialBoard(board);
 
-        // Clear the log file when starting a new game
         File logFile = new File(basePath + "/current/log.txt");
         if(logFile.exists()) {
             logFile.delete();

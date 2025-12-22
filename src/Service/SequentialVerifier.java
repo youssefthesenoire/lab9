@@ -11,7 +11,6 @@ public class SequentialVerifier {
         List<LocationOnBoard> duplicates = new ArrayList<>();
         boolean hasEmptyCells = false;
 
-        // Check rows
         for(int row = 0; row < 9; row++) {
             HashMap<Integer, List<Integer>> rowMap = new HashMap<>();
             for(int col = 0; col < 9; col++) {
@@ -34,7 +33,6 @@ public class SequentialVerifier {
             }
         }
 
-        // Check columns
         for(int col = 0; col < 9; col++) {
             HashMap<Integer, List<Integer>> colMap = new HashMap<>();
             for(int row = 0; row < 9; row++) {
@@ -54,7 +52,6 @@ public class SequentialVerifier {
             }
         }
 
-        // Check boxes (3x3)
         for(int boxRow = 0; boxRow < 3; boxRow++) {
             for(int boxCol = 0; boxCol < 3; boxCol++) {
                 HashMap<Integer, List<LocationOnBoard>> boxMap = new HashMap<>();

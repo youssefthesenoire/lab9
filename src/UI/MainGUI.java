@@ -83,7 +83,6 @@ public class MainGUI extends JFrame {
                 showDifficultySelection();
             }
         } else {
-            // User chose not to continue, delete current game files
             gameController.deleteCurrentGameFiles();
             showDifficultySelection();
         }
