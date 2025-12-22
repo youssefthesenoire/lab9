@@ -34,13 +34,11 @@ public class GameDriver {
             throw new SolutionInvalidException("Source solution is " + result.getState() +
                     ". Must be a fully valid Sudoku board.");
         }
-
-        // Generate games from valid board
+        
         generateGamesFromValidBoard(sourceBoard);
     }
 
     public void generateGamesFromValidBoard(int[][] sourceBoard) {
-        // Clear existing games first
         clearFolder("easy");
         clearFolder("medium");
         clearFolder("hard");
