@@ -65,7 +65,7 @@ public class GameDriver {
         for(int i = 0; i < 9; i++) {
             System.arraycopy(sourceBoard[i], 0, gameBoard[i], 0, 9);
         }
-        
+
         List<int[]> positionsToRemove = randomPairs.generateDistinctPairs(cellsToRemove);
         for(int[] pos : positionsToRemove) {
             gameBoard[pos[0]][pos[1]] = 0; // Remove cell value
@@ -90,7 +90,6 @@ public class GameDriver {
 
     private void saveGame(int[][] board, Difficulty difficulty) {
         String folderName = difficulty.toString().toLowerCase();
-        // Use fixed filename to overwrite existing
         String fileName = "game_" + difficulty.toString().toLowerCase() + ".csv";
         String filePath = basePath + "/" + folderName + "/" + fileName;
 
