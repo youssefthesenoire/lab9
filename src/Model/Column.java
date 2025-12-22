@@ -9,15 +9,12 @@ public class Column {
     public Column() {
         this.columnElements = new int[9];
     }
-
     public int[] getcolumnElements() {
         return columnElements;
     }
-
     public void setcolumnElements(int[] columnElements) {
         this.columnElements = columnElements;
     }
-
     public HashMap<Integer, ArrayList<Integer>> getDuplicatedColumn() {
         HashMap<Integer, ArrayList<Integer>> dup = new HashMap<>();
         for(int i = 0; i < 9; i++) {

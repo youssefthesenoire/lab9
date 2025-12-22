@@ -14,7 +14,6 @@ public class CSVDatabaseManager {
             String[] nextRecord;
             int counter = 0;
             int[][] elements = new int[9][9];
-
             while ((nextRecord = csvReader.readNext()) != null && counter < 9) {
                 for(int j = 0; j < 9; j++) {
                     elements[counter][j] = Integer.parseInt(nextRecord[j].trim());
@@ -22,7 +21,6 @@ public class CSVDatabaseManager {
                 counter++;
             }
             csvReader.close();
-
             for(int i = 0; i < 9; i++) {
                 int[] r = new int[9];
                 int[] c = new int[9];
@@ -33,7 +31,6 @@ public class CSVDatabaseManager {
                 rows[i].setRowElements(r);
                 columns[i].setcolumnElements(c);
             }
-
             for(int i = 0; i < 3; i++) {
                 for(int j = 0; j < 3; j++) {
                     int[] b = new int[9];

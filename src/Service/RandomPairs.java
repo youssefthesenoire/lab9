@@ -14,20 +14,16 @@ public class RandomPairs {
     public RandomPairs() {
         this.random = new Random(System.currentTimeMillis());
     }
-
     public RandomPairs(long seed) {
         this.random = new Random(seed);
     }
-
     public List<int[]> generateDistinctPairs(int n) {
         if (n < 0 || n > MAX_UNIQUE_PAIRS) {
             throw new IllegalArgumentException(
                     "n must be between 0 and " + MAX_UNIQUE_PAIRS + " (inclusive)");
         }
-
         Set<Integer> used = new HashSet<>();
         List<int[]> result = new ArrayList<>(n);
-
         while (result.size() < n) {
             int x = random.nextInt(MAX_COORD + 1);
             int y = random.nextInt(MAX_COORD + 1);

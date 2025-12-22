@@ -10,7 +10,6 @@ public class Game {
         this.initialBoard = new int[9][9];
         this.currentBoard = new int[9][9];
         this.fixedCells = new boolean[9][9];
-
         for(int i = 0; i < 9; i++) {
             for(int j = 0; j < 9; j++) {
                 this.initialBoard[i][j] = board[i][j];
@@ -20,33 +19,24 @@ public class Game {
         }
         this.difficulty = difficulty;
     }
-
     public int[][] getBoard() {
         return currentBoard;
     }
-
     public int[][] getInitialBoard() {
         return initialBoard;
     }
-
     public Difficulty getDifficulty() {
         return difficulty;
     }
-
     public boolean isFixedCell(int row, int col) {
         return fixedCells[row][col];
     }
-
     public void setCellValue(int row, int col, int value) {
         currentBoard[row][col] = value;
     }
-
-    // Add a method to check if a cell is an original clue (non-zero in initial board)
     public boolean isOriginalClue(int row, int col) {
         return initialBoard[row][col] != 0;
     }
-
-    // Add a method to update fixed cells based on original clues only
     public void updateFixedCells() {
         for(int i = 0; i < 9; i++) {
             for(int j = 0; j < 9; j++) {
@@ -54,7 +44,6 @@ public class Game {
             }
         }
     }
-
     public int getEmptyCellCount() {
         int count = 0;
         for(int i = 0; i < 9; i++) {
@@ -66,7 +55,6 @@ public class Game {
         }
         return count;
     }
-
     public boolean isComplete() {
         return getEmptyCellCount() == 0;
     }

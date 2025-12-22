@@ -10,11 +10,9 @@ public class VerificationResult {
         this.state = state;
         this.duplicateLocations = duplicateLocations;
     }
-
     public GameState getState() {
         return state;
     }
-
     public List<LocationOnBoard> getDuplicateLocations() {
         return duplicateLocations;
     }

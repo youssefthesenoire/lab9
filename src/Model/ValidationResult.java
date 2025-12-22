@@ -9,13 +9,10 @@ public class ValidationResult {
     public ValidationResult(boolean valid, ArrayList<LocationOnBoard> duplicateLocations) {
         this.valid = valid;
         this.duplicateLocations = duplicateLocations;
-
     }
-
     public boolean isValid() {
         return valid;
     }
-    
     public ArrayList<LocationOnBoard> getDuplicateLocations() {
         return duplicateLocations;
     }

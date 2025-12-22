@@ -8,11 +8,9 @@ public class Catalog {
         this.hasUnfinished = hasUnfinished;
         this.allModesExist = allModesExist;
     }
-
     public boolean isHasUnfinished() {
         return hasUnfinished;
     }
-
     public boolean isAllModesExist() {
         return allModesExist;
     }

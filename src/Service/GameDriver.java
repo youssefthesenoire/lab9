@@ -16,7 +16,6 @@ public class GameDriver {
         this.randomPairs = new RandomPairs();
         createDirectoryStructure();
     }
-
     private void createDirectoryStructure() {
         new File(basePath).mkdirs();
         new File(basePath + "/easy").mkdirs();
@@ -24,17 +23,13 @@ public class GameDriver {
         new File(basePath + "/hard").mkdirs();
         new File(basePath + "/current").mkdirs();
     }
-
     public void generateGamesFromSolution(String sourceFilePath) throws SolutionInvalidException, IOException {
         int[][] sourceBoard = loadBoardFromCSV(sourceFilePath);
-        
         VerificationResult result = SequentialVerifier.verify(sourceBoard);
-
         if(result.getState() != GameState.VALID) {
             throw new SolutionInvalidException("Source solution is " + result.getState() +
                     ". Must be a fully valid Sudoku board.");
         }
-
         generateGamesFromValidBoard(sourceBoard);
     }
 
@@ -42,12 +37,10 @@ public class GameDriver {
         clearFolder("easy");
         clearFolder("medium");
         clearFolder("hard");
-
         generateAndSaveGame(sourceBoard, Difficulty.EASY, 10);
         generateAndSaveGame(sourceBoard, Difficulty.MEDIUM, 20);
         generateAndSaveGame(sourceBoard, Difficulty.HARD, 25);
     }
-
     private void clearFolder(String folderName) {
         File folder = new File(basePath + "/" + folderName);
         if(folder.exists() && folder.isDirectory()) {
@@ -59,25 +52,21 @@ public class GameDriver {
             }
         }
     }
-
     private void generateAndSaveGame(int[][] sourceBoard, Difficulty difficulty, int cellsToRemove) {
         int[][] gameBoard = new int[9][9];
         for(int i = 0; i < 9; i++) {
             System.arraycopy(sourceBoard[i], 0, gameBoard[i], 0, 9);
         }
-
         List<int[]> positionsToRemove = randomPairs.generateDistinctPairs(cellsToRemove);
         for(int[] pos : positionsToRemove) {
             gameBoard[pos[0]][pos[1]] = 0;
         }
-
         saveGame(gameBoard, difficulty);
     }
 
     private int[][] loadBoardFromCSV(String filePath) throws IOException {
         int[][] board = new int[9][9];
         List<String> lines = Files.readAllLines(Paths.get(filePath));
-
         for(int row = 0; row < 9 && row < lines.size(); row++) {
             String[] values = lines.get(row).split(",");
             for(int col = 0; col < 9 && col < values.length; col++) {
@@ -87,12 +76,10 @@ public class GameDriver {
         }
         return board;
     }
-
     private void saveGame(int[][] board, Difficulty difficulty) {
         String folderName = difficulty.toString().toLowerCase();
         String fileName = "game_" + difficulty.toString().toLowerCase() + ".csv";
         String filePath = basePath + "/" + folderName + "/" + fileName;
-
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
             for(int i = 0; i < 9; i++) {
                 for(int j = 0; j < 9; j++) {
@@ -105,7 +92,6 @@ public class GameDriver {
             e.printStackTrace();
         }
     }
-
     public void saveInitialBoard(int[][] board) {
         String filePath = basePath + "/current/game.csv";
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
@@ -120,7 +106,6 @@ public class GameDriver {
             e.printStackTrace();
         }
     }
-
     public void deleteCurrentGame() {
         File currentFolder = new File(basePath + "/current");
         if(currentFolder.exists()) {
@@ -132,10 +117,8 @@ public class GameDriver {
             }
         }
     }
-
     public void copyGameToCurrent(int[][] board) {
         saveInitialBoard(board);
-
         File logFile = new File(basePath + "/current/log.txt");
         if(logFile.exists()) {
             logFile.delete();

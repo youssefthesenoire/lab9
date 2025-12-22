@@ -7,7 +7,6 @@ import Model.Game;
 import Utility.MusicPlayer;
 import Exceptions.NotFoundException;
 import Exceptions.SolutionInvalidException;
-
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
@@ -29,13 +28,10 @@ public class MainGUI extends JFrame {
             System.err.println("Music files not found: " + e.getMessage());
             musicEnabled = false;
         }
-
         gameController = new GameController();
         controller = new ControllerFacade(gameController);
-
         initializeUI();
     }
-
     private void initializeUI() {
         setTitle("Sudoku Game");
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -45,13 +41,10 @@ public class MainGUI extends JFrame {
                 handleWindowClosing();
             }
         });
-
         setLayout(new BorderLayout());
-
         boolean[] catalog = controller.getCatalog();
         boolean hasUnfinished = catalog[0];
         boolean allModesExist = catalog[1];
-
         if(hasUnfinished) {
             showContinueDialog();
         } else if(allModesExist) {
@@ -59,18 +52,15 @@ public class MainGUI extends JFrame {
         } else {
             showLoadSolvedDialog();
         }
-
         setSize(650, 750);
         setLocationRelativeTo(null);
         setVisible(true);
     }
-
     private void showContinueDialog() {
         int response = JOptionPane.showConfirmDialog(this,
                 "You have an unfinished game. Do you want to continue?",
                 "Continue Game",
                 JOptionPane.YES_NO_OPTION);
-
         if(response == JOptionPane.YES_OPTION) {
             try {
                 Game game = gameController.loadUnfinishedGame();
@@ -87,40 +77,28 @@ public class MainGUI extends JFrame {
             showDifficultySelection();
         }
     }
-
     private void showDifficultySelection() {
         getContentPane().removeAll();
-
         JPanel selectionPanel = new JPanel(new BorderLayout());
         selectionPanel.setBackground(new Color(240, 240, 240));
-
         JLabel titleLabel = new JLabel("SELECT DIFFICULTY", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 32));
         titleLabel.setForeground(Color.BLACK);
         titleLabel.setBorder(BorderFactory.createEmptyBorder(50, 0, 50, 0));
-
         JPanel buttonPanel = new JPanel(new GridLayout(4, 1, 10, 10));
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(20, 100, 100, 100));
         buttonPanel.setOpaque(false);
-
         JButton easyButton = createStyledButton("  EASY  - 10 empty cells", new Color(100, 200, 100));
         JButton mediumButton = createStyledButton("  MEDIUM - 20 empty cells", new Color(255, 200, 50));
         JButton hardButton = createStyledButton("  HARD  - 25 empty cells", new Color(255, 100, 100));
-        JButton backButton = createStyledButton("  LOAD A SOLVED SUDOKU", new Color(150, 150, 150));
-
         easyButton.addActionListener(e -> loadGameByDifficulty('E'));
         mediumButton.addActionListener(e -> loadGameByDifficulty('M'));
         hardButton.addActionListener(e -> loadGameByDifficulty('H'));
-        backButton.addActionListener(e -> loadSolvedSudoku());
-
         buttonPanel.add(easyButton);
         buttonPanel.add(mediumButton);
         buttonPanel.add(hardButton);
-        buttonPanel.add(backButton);
-
         selectionPanel.add(titleLabel, BorderLayout.CENTER);
         selectionPanel.add(buttonPanel, BorderLayout.SOUTH);
-
         add(selectionPanel);
         revalidate();
         repaint();
@@ -128,15 +106,12 @@ public class MainGUI extends JFrame {
             musicPlayer.playStartingMusic();
         }
     }
-
     private void loadGameByDifficulty(char difficultyChar) {
         if (musicEnabled && musicPlayer != null) {
             musicPlayer.stopMusic();
         }
-
         try {
             int[][] board = controller.getGame(difficultyChar);
-
             Difficulty difficulty;
             switch(difficultyChar) {
                 case 'E': difficulty = Difficulty.EASY; break;
@@ -144,7 +119,6 @@ public class MainGUI extends JFrame {
                 case 'H': difficulty = Difficulty.HARD; break;
                 default: difficulty = null;
             }
-
             Game game = new Game(board, difficulty);
             loadGameUI(game, difficulty + " Game");
         } catch (NotFoundException e) {
@@ -160,42 +134,47 @@ public class MainGUI extends JFrame {
                     JOptionPane.ERROR_MESSAGE);
         }
     }
-
     public void showLoadSolvedDialog() {
         getContentPane().removeAll();
-
         JPanel loadPanel = new JPanel(new BorderLayout());
-        loadPanel.setBackground(new Color(240, 240, 240));
-
+        loadPanel.setBackground(new Color(250, 250, 245));
         JLabel titleLabel = new JLabel("LOAD SOLVED SUDOKU", SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 28));
-        titleLabel.setForeground(Color.BLACK);
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(50, 0, 50, 0));
-
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 36));
+        titleLabel.setForeground(new Color(60, 60, 120));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(40, 0, 30, 0));
         JPanel centerPanel = new JPanel(new GridBagLayout());
-        centerPanel.setOpaque(false);
-
-        JLabel instructionLabel = new JLabel(
-                "\t\t\tNo games found in storage.\n" +
-                        "\t\t\tPlease load a fully solved Sudoku CSV file to generate games\n" +
-                        "\t\t\tThe file must be 9x9 with numbers 1-9.\n");
-        instructionLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        centerPanel.setBackground(new Color(250, 250, 245));
+        centerPanel.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
+        JTextArea instructionLabel = new JTextArea();
+        instructionLabel.setText("                       No games found in storage.\n" +
+                "Please load a fully solved Sudoku CSV file to generate games.\n" +
+                "              The file must be 9x9 with numbers 1-9.");
+        instructionLabel.setFont(new Font("Arial", Font.PLAIN, 20));
         instructionLabel.setForeground(Color.BLACK);
-
-        JButton loadButton = createStyledButton("  LOAD CSV FILE", new Color(100, 150, 255));
-        loadButton.setPreferredSize(new Dimension(300, 60));
+        instructionLabel.setBackground(new Color(250, 250, 245));
+        instructionLabel.setEditable(false);
+        instructionLabel.setFocusable(false);
+        instructionLabel.setLineWrap(true);
+        instructionLabel.setWrapStyleWord(true);
+        instructionLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 30, 10));
+        instructionLabel.setPreferredSize(new Dimension(550, 80));
+        JButton loadButton = createStyledButton("  LOAD CSV FILE  ", new Color(100, 150, 255));
+        loadButton.setFont(new Font("Arial", Font.BOLD, 18));
+        loadButton.setPreferredSize(new Dimension(350, 70));
         loadButton.addActionListener(e -> loadSolvedSudoku());
-
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 0;
-        gbc.insets = new Insets(0, 0, 30, 0);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.insets = new Insets(0, 0, 40, 0);
+        gbc.weightx = 1.0;
         centerPanel.add(instructionLabel, gbc);
-
         gbc.gridy = 1;
-        gbc.insets = new Insets(30, 0, 0, 0);
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.insets = new Insets(0, 0, 0, 0);
+        gbc.weightx = 0;
         centerPanel.add(loadButton, gbc);
-
         loadPanel.add(titleLabel, BorderLayout.NORTH);
         loadPanel.add(centerPanel, BorderLayout.CENTER);
         add(loadPanel);
@@ -205,17 +184,13 @@ public class MainGUI extends JFrame {
             musicPlayer.playStartingMusic();
         }
     }
-
     private void loadSolvedSudoku() {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("Select Solved Sudoku CSV File");
         fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("CSV Files", "csv"));
-
         int result = fileChooser.showOpenDialog(this);
-
         if(result == JFileChooser.APPROVE_OPTION) {
             File selectedFile = fileChooser.getSelectedFile();
-
             try {
                 controller.driveGames(selectedFile.getAbsolutePath());
                 JOptionPane.showMessageDialog(this,
@@ -241,7 +216,6 @@ public class MainGUI extends JFrame {
             }
         }
     }
-
     private void loadGameUI(Game game, String title) {
         getContentPane().removeAll();
         sudokuGUI = new SudokuGUI(controller, gameController, game, this, musicPlayer, musicEnabled);
@@ -253,21 +227,6 @@ public class MainGUI extends JFrame {
             musicPlayer.playInGameMusic();
         }
     }
-
-    private void showWelcomeScreen() {
-        boolean[] catalog = controller.getCatalog();
-        boolean hasUnfinished = catalog[0];
-        boolean allModesExist = catalog[1];
-
-        if(hasUnfinished) {
-            showContinueDialog();
-        } else if(allModesExist) {
-            showDifficultySelection();
-        } else {
-            showLoadSolvedDialog();
-        }
-    }
-
     private JButton createStyledButton(String text, Color color) {
         JButton button = new JButton(text);
         button.setFont(new Font("Arial", Font.BOLD, 16));
@@ -276,10 +235,8 @@ public class MainGUI extends JFrame {
         button.setFocusPainted(false);
         button.setBorder(BorderFactory.createRaisedBevelBorder());
         button.setPreferredSize(new Dimension(300, 50));
-
         return button;
     }
-
     private void handleWindowClosing() {
         if (sudokuGUI != null && sudokuGUI.hasUnsavedChanges()) {
             int option = JOptionPane.showConfirmDialog(this,
@@ -288,7 +245,6 @@ public class MainGUI extends JFrame {
                     "Save Progress",
                     JOptionPane.YES_NO_CANCEL_OPTION,
                     JOptionPane.QUESTION_MESSAGE);
-
             if(option == JOptionPane.YES_OPTION) {
                 disposeAndCleanup();
             } else if(option == JOptionPane.NO_OPTION) {
@@ -299,24 +255,20 @@ public class MainGUI extends JFrame {
             disposeAndCleanup();
         }
     }
-
     private void disposeAndCleanup() {
         if (musicPlayer != null) {
             musicPlayer.stopMusic();
         }
         dispose();
     }
-
     public void returnToMainMenu() {
         sudokuGUI = null;
         showDifficultySelection();
         setTitle("Sudoku Game");
-
         if (musicEnabled && musicPlayer != null) {
             musicPlayer.playStartingMusic();
         }
     }
-
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             try {

@@ -10,7 +10,6 @@ public class SequentialVerifier {
     public static VerificationResult verify(int[][] board) {
         List<LocationOnBoard> duplicates = new ArrayList<>();
         boolean hasEmptyCells = false;
-
         for(int row = 0; row < 9; row++) {
             HashMap<Integer, List<Integer>> rowMap = new HashMap<>();
             for(int col = 0; col < 9; col++) {
@@ -32,7 +31,6 @@ public class SequentialVerifier {
                 }
             }
         }
-
         for(int col = 0; col < 9; col++) {
             HashMap<Integer, List<Integer>> colMap = new HashMap<>();
             for(int row = 0; row < 9; row++) {
@@ -51,7 +49,6 @@ public class SequentialVerifier {
                 }
             }
         }
-
         for(int boxRow = 0; boxRow < 3; boxRow++) {
             for(int boxCol = 0; boxCol < 3; boxCol++) {
                 HashMap<Integer, List<LocationOnBoard>> boxMap = new HashMap<>();
@@ -74,7 +71,6 @@ public class SequentialVerifier {
                 }
             }
         }
-
         if(!duplicates.isEmpty()) {
             return new VerificationResult(GameState.INVALID, duplicates);
         } else if(hasEmptyCells) {

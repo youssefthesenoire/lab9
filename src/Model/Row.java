@@ -9,15 +9,12 @@ public class Row {
     public Row() {
         this.rowElements = new int[9];
     }
-
     public int[] getRowElements() {
         return rowElements;
     }
-
     public void setRowElements(int[] rowElements) {
         this.rowElements = rowElements;
     }
-
     public HashMap<Integer, ArrayList<Integer>> getDuplicatedRow() {
         HashMap<Integer, ArrayList<Integer>> dup = new HashMap<>();
         for(int i = 0; i < 9; i++) {

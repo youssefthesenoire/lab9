@@ -11,11 +11,9 @@ public class Box {
         this.sRow = sRow;
         this.sCol = sCol;
     }
-
     public int[] getBoxElements() {
         return boxElements;
     }
-
     public void setBoxElements(int[] boxElements) {
         this.boxElements = boxElements;
     }

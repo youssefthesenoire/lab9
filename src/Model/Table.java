@@ -18,26 +18,21 @@ public class Table {
         }
         CSVDatabaseManager.loadData(boxes, rows, columns, filePath);
     }
-
     public static Table getTable(String filePath) {
         if(table == null) {
             table = new Table(filePath);
         }
         return table;
     }
-
     public static void resetTable() {
         table = null;
     }
-
     public Row[] getRows() {
         return rows;
     }
-
     public Box[] getBoxes() {
         return boxes;
     }
-
     public Column[] getColumns() {
         return columns;
     }
