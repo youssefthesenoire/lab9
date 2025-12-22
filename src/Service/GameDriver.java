@@ -114,24 +114,9 @@ public class GameDriver {
         }
     }
 
-    public void saveCurrentGame(int[][] board) {
-        // This is only called when starting a new game (copyGameToCurrent)
-        // or when explicitly saving. We should keep it for explicit saves.
+    // ONLY save the initial board once - never update it
+    public void saveInitialBoard(int[][] board) {
         String filePath = basePath + "/current/game.csv";
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
-            for(int i = 0; i < 9; i++) {
-                for(int j = 0; j < 9; j++) {
-                    writer.write(String.valueOf(board[i][j]));
-                    if(j < 8) writer.write(",");
-                }
-                writer.newLine();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-    public void saveInitialGame(int[][] board) {
-        String filePath = basePath + "/current/initial.csv";
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
             for(int i = 0; i < 9; i++) {
                 for(int j = 0; j < 9; j++) {
@@ -158,8 +143,8 @@ public class GameDriver {
     }
 
     public void copyGameToCurrent(int[][] board) {
-        // Save the original game state (for initial board)
-        saveCurrentGame(board);
+        // Save ONLY the initial board (never update this file)
+        saveInitialBoard(board);
 
         // Clear the log file when starting a new game
         File logFile = new File(basePath + "/current/log.txt");

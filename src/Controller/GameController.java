@@ -45,7 +45,7 @@ public class GameController implements Viewable {
             Game game = new Game(board, level);
             this.currentGame = game;
 
-            // Copy to current folder for incomplete state tracking
+            // Copy to current folder - saves ONLY initial board
             gameDriver.copyGameToCurrent(board);
             initializeLogFile();
 
@@ -57,10 +57,6 @@ public class GameController implements Viewable {
 
     @Override
     public void driveGames(Game sourceGame) throws SolutionInvalidException {
-        // Actually, this method should load from a file path
-        // But based on the interface, it takes a Game object
-        // The ControllerFacade handles the conversion
-
         // Verify the source solution first
         VerificationResult result = SequentialVerifier.verify(sourceGame.getBoard());
 
@@ -144,10 +140,9 @@ public class GameController implements Viewable {
 
     @Override
     public void saveCurrentGame(Game game) {
-        if(game != null) {
-            // Save the current board state
-            gameDriver.saveCurrentGame(game.getBoard());
-        }
+        // DO NOTHING - we don't save the current game to CSV
+        // We only use the log file to track changes
+        // The CSV file should remain as the initial board only
     }
 
     @Override
@@ -178,12 +173,32 @@ public class GameController implements Viewable {
         }
     }
 
+    // Add method to delete current game files without completing
+    public void deleteCurrentGameFiles() {
+        File currentFolder = new File(basePath + "/current");
+        if(currentFolder.exists() && currentFolder.isDirectory()) {
+            File[] files = currentFolder.listFiles();
+            if(files != null) {
+                for(File file : files) {
+                    file.delete();
+                }
+            }
+        }
+    }
+
     private boolean checkUnfinishedGame() {
         File currentFolder = new File(basePath + "/current");
         if(!currentFolder.exists()) {
             return false;
         }
 
+        // Check if we have a log file with any entries
+        File logFile = new File(currentFolder, "log.txt");
+        if(logFile.exists() && logFile.length() > 0) {
+            return true;
+        }
+
+        // Also check if we have a game file (initial board)
         File gameFile = new File(currentFolder, "game.csv");
         return gameFile.exists() && gameFile.length() > 0;
     }
@@ -241,14 +256,14 @@ public class GameController implements Viewable {
             throw new NotFoundException("No unfinished game found");
         }
 
-        // Load the board from saved file (this is the initial board with original clues)
+        // Load the initial board from file (original clues only)
         int[][] initialBoard = loadBoardFromFile(gameFile);
 
         // Create game with original clues as fixed cells
         Game game = new Game(initialBoard, null);
         this.currentGame = game;
 
-        // Apply log file to restore user moves
+        // Apply log file to restore ALL user moves
         File logFile = new File(basePath + "/current/log.txt");
         if(logFile.exists() && logFile.length() > 0) {
             List<String> logEntries = Files.readAllLines(logFile.toPath());
