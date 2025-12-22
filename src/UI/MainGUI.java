@@ -87,6 +87,8 @@ public class MainGUI extends JFrame {
                 showDifficultySelection();
             }
         } else {
+            // User chose not to continue, delete current game files
+            gameController.deleteCurrentGameFiles();
             showDifficultySelection();
         }
     }
@@ -95,11 +97,11 @@ public class MainGUI extends JFrame {
         getContentPane().removeAll();
 
         JPanel selectionPanel = new JPanel(new BorderLayout());
-        selectionPanel.setBackground(new Color(30, 30, 40));
+        selectionPanel.setBackground(new Color(240, 240, 240));
 
         JLabel titleLabel = new JLabel("SELECT DIFFICULTY", SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Monospaced", Font.BOLD, 36));
-        titleLabel.setForeground(new Color(0, 200, 255));
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 32));
+        titleLabel.setForeground(Color.BLACK);
         titleLabel.setBorder(BorderFactory.createEmptyBorder(50, 0, 50, 0));
 
         JPanel buttonPanel = new JPanel(new GridLayout(4, 1, 10, 10));
@@ -109,17 +111,17 @@ public class MainGUI extends JFrame {
         JButton easyButton = createStyledButton("  EASY  - 10 empty cells", new Color(100, 200, 100));
         JButton mediumButton = createStyledButton("  MEDIUM - 20 empty cells", new Color(255, 200, 50));
         JButton hardButton = createStyledButton("  HARD  - 25 empty cells", new Color(255, 100, 100));
-        JButton loadButton = createStyledButton("  LOAD A SOLVED SUDOKU", new Color(150, 150, 150));
+      //  JButton loadButton = createStyledButton("  LOAD A SOLVED SUDOKU", new Color(150, 150, 150));
 
         easyButton.addActionListener(e -> loadGameByDifficulty('E'));
         mediumButton.addActionListener(e -> loadGameByDifficulty('M'));
         hardButton.addActionListener(e -> loadGameByDifficulty('H'));
-        loadButton.addActionListener(e -> loadSolvedSudoku());
+       // loadButton.addActionListener(e -> loadSolvedSudoku());
 
         buttonPanel.add(easyButton);
         buttonPanel.add(mediumButton);
         buttonPanel.add(hardButton);
-        buttonPanel.add(loadButton);
+      //  buttonPanel.add(loadButton);
 
         selectionPanel.add(titleLabel, BorderLayout.CENTER);
         selectionPanel.add(buttonPanel, BorderLayout.SOUTH);
@@ -165,24 +167,22 @@ public class MainGUI extends JFrame {
         getContentPane().removeAll();
 
         JPanel loadPanel = new JPanel(new BorderLayout());
-        loadPanel.setBackground(new Color(30, 30, 40));
+        loadPanel.setBackground(new Color(240, 240, 240));
 
         JLabel titleLabel = new JLabel("LOAD SOLVED SUDOKU", SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Monospaced", Font.BOLD, 32));
-        titleLabel.setForeground(new Color(255, 100, 100));
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 28));
+        titleLabel.setForeground(Color.BLACK);
         titleLabel.setBorder(BorderFactory.createEmptyBorder(50, 0, 50, 0));
 
         JPanel centerPanel = new JPanel(new GridBagLayout());
         centerPanel.setOpaque(false);
 
         JLabel instructionLabel = new JLabel(
-                "<html><div style='text-align: center; width: 400px;'>" +
-                        "No games found in storage.<br>" +
+                "<html><center>No games found in storage.<br>" +
                         "Please load a fully solved Sudoku CSV file to generate games.<br><br>" +
-                        "The file must be 9x9 with numbers 1-9." +
-                        "</div></html>");
+                        "The file must be 9x9 with numbers 1-9.</center></html>");
         instructionLabel.setFont(new Font("Arial", Font.PLAIN, 14));
-        instructionLabel.setForeground(Color.WHITE);
+        instructionLabel.setForeground(Color.BLACK);
 
         JButton loadButton = createStyledButton("  LOAD CSV FILE", new Color(100, 150, 255));
         loadButton.setPreferredSize(new Dimension(300, 60));
@@ -219,23 +219,18 @@ public class MainGUI extends JFrame {
             try {
                 controller.driveGames(selectedFile.getAbsolutePath());
                 JOptionPane.showMessageDialog(this,
-                        "<html><div style='text-align: center;'>" +
-                                "<h3>✓ Games Generated Successfully!</h3>" +
-                                "<p>Three difficulty levels have been created:</p>" +
-                                "<p>• Easy (10 empty cells)</p>" +
-                                "<p>• Medium (20 empty cells)</p>" +
-                                "<p>• Hard (25 empty cells)</p>" +
-                                "</div></html>",
+                        "Games Generated Successfully!\n\n" +
+                                "Three difficulty levels have been created:\n" +
+                                "• Easy (10 empty cells)\n" +
+                                "• Medium (20 empty cells)\n" +
+                                "• Hard (25 empty cells)",
                         "Success",
                         JOptionPane.INFORMATION_MESSAGE);
                 showDifficultySelection();
             } catch (SolutionInvalidException e) {
                 JOptionPane.showMessageDialog(this,
-                        "<html><div style='text-align: center;'>" +
-                                "<h3>✗ Invalid Solution</h3>" +
-                                "<p>" + e.getMessage() + "</p>" +
-                                "<p>Please provide a fully solved, valid Sudoku board.</p>" +
-                                "</div></html>",
+                        "Invalid Solution\n\n" + e.getMessage() + "\n" +
+                                "Please provide a fully solved, valid Sudoku board.",
                         "Invalid Solution",
                         JOptionPane.ERROR_MESSAGE);
             } catch (Exception e) {
@@ -291,18 +286,21 @@ public class MainGUI extends JFrame {
     private void handleWindowClosing() {
         if (sudokuGUI != null && sudokuGUI.hasUnsavedChanges()) {
             int option = JOptionPane.showConfirmDialog(this,
-                    "Do you want to save your current progress before exiting?",
+                    "Do you want to save your current progress before exiting?\n" +
+                            "Choose 'No' to delete all progress and exit.",
                     "Save Progress",
                     JOptionPane.YES_NO_CANCEL_OPTION,
                     JOptionPane.QUESTION_MESSAGE);
 
             if(option == JOptionPane.YES_OPTION) {
-                sudokuGUI.saveGame();
+                // Game is auto-saved via log, just exit
                 disposeAndCleanup();
             } else if(option == JOptionPane.NO_OPTION) {
-                gameController.saveCurrentGame(null);
+                // Delete current game files
+                gameController.deleteCurrentGameFiles();
                 disposeAndCleanup();
             }
+            // Cancel - do nothing
         } else {
             disposeAndCleanup();
         }
@@ -317,7 +315,7 @@ public class MainGUI extends JFrame {
 
     public void returnToMainMenu() {
         sudokuGUI = null;
-        showWelcomeScreen();
+        showDifficultySelection();
         setTitle("Sudoku Game");
 
         if (musicEnabled && musicPlayer != null) {

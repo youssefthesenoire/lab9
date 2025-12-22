@@ -40,10 +40,27 @@ public class GameDriver {
     }
 
     public void generateGamesFromValidBoard(int[][] sourceBoard) {
+        // Clear existing games first
+        clearFolder("easy");
+        clearFolder("medium");
+        clearFolder("hard");
+
         // Generate three difficulty levels at once
         generateAndSaveGame(sourceBoard, Difficulty.EASY, 10);
         generateAndSaveGame(sourceBoard, Difficulty.MEDIUM, 20);
         generateAndSaveGame(sourceBoard, Difficulty.HARD, 25);
+    }
+
+    private void clearFolder(String folderName) {
+        File folder = new File(basePath + "/" + folderName);
+        if(folder.exists() && folder.isDirectory()) {
+            File[] files = folder.listFiles();
+            if(files != null) {
+                for(File file : files) {
+                    file.delete();
+                }
+            }
+        }
     }
 
     private void generateAndSaveGame(int[][] sourceBoard, Difficulty difficulty, int cellsToRemove) {
@@ -78,7 +95,8 @@ public class GameDriver {
 
     private void saveGame(int[][] board, Difficulty difficulty) {
         String folderName = difficulty.toString().toLowerCase();
-        String fileName = "game_" + System.currentTimeMillis() + ".csv";
+        // Use fixed filename to overwrite existing
+        String fileName = "game_" + difficulty.toString().toLowerCase() + ".csv";
         String filePath = basePath + "/" + folderName + "/" + fileName;
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
@@ -94,7 +112,8 @@ public class GameDriver {
         }
     }
 
-    public void saveCurrentGame(int[][] board) {
+    // ONLY save the initial board once - never update it
+    public void saveInitialBoard(int[][] board) {
         String filePath = basePath + "/current/game.csv";
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
             for(int i = 0; i < 9; i++) {
@@ -122,7 +141,8 @@ public class GameDriver {
     }
 
     public void copyGameToCurrent(int[][] board) {
-        saveCurrentGame(board);
+        // Save ONLY the initial board (never update this file)
+        saveInitialBoard(board);
 
         // Clear the log file when starting a new game
         File logFile = new File(basePath + "/current/log.txt");

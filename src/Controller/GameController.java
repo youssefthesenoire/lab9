@@ -6,6 +6,8 @@ import Service.*;
 import Exceptions.*;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Random;
 
@@ -43,7 +45,7 @@ public class GameController implements Viewable {
             Game game = new Game(board, level);
             this.currentGame = game;
 
-            // Copy to current folder for incomplete state tracking
+            // Copy to current folder - saves ONLY initial board
             gameDriver.copyGameToCurrent(board);
             initializeLogFile();
 
@@ -55,10 +57,6 @@ public class GameController implements Viewable {
 
     @Override
     public void driveGames(Game sourceGame) throws SolutionInvalidException {
-        // Actually, this method should load from a file path
-        // But based on the interface, it takes a Game object
-        // The ControllerFacade handles the conversion
-
         // Verify the source solution first
         VerificationResult result = SequentialVerifier.verify(sourceGame.getBoard());
 
@@ -67,6 +65,9 @@ public class GameController implements Viewable {
                     "Source solution is " + result.getState() +
                             ". Must be a fully valid Sudoku board.");
         }
+
+        // Clear existing folders first
+        clearAllGameFolders();
 
         // Generate three difficulty levels
         gameDriver.generateGamesFromValidBoard(sourceGame.getBoard());
@@ -139,28 +140,50 @@ public class GameController implements Viewable {
 
     @Override
     public void saveCurrentGame(Game game) {
-        if(game != null) {
-            gameDriver.saveCurrentGame(game.getBoard());
-        }
+        // DO NOTHING - we don't save the current game to CSV
+        // We only use the log file to track changes
+        // The CSV file should remain as the initial board only
     }
 
     @Override
     public void deleteCompletedGame(Game game) {
-        // Only delete from difficulty folder if the game has a difficulty
-        if(game.getDifficulty() != null) {
-            String difficultyFolderPath = basePath + "/" + game.getDifficulty().toString().toLowerCase();
-            File difficultyFolder = new File(difficultyFolderPath);
+        // Delete all games in all difficulty folders
+        String[] difficulties = {"easy", "medium", "hard"};
+        for (String difficulty : difficulties) {
+            File difficultyFolder = new File(basePath + "/" + difficulty);
             if(difficultyFolder.exists() && difficultyFolder.isDirectory()) {
                 File[] files = difficultyFolder.listFiles();
-                if(files != null && files.length > 0) {
-                    // Delete the first game in the folder
-                    files[0].delete();
+                if(files != null) {
+                    for(File file : files) {
+                        file.delete();
+                    }
                 }
             }
         }
 
-        // Always delete from current folder
-        gameDriver.deleteCurrentGame();
+        // Delete current folder contents
+        File currentFolder = new File(basePath + "/current");
+        if(currentFolder.exists() && currentFolder.isDirectory()) {
+            File[] files = currentFolder.listFiles();
+            if(files != null) {
+                for(File file : files) {
+                    file.delete();
+                }
+            }
+        }
+    }
+
+    // Add method to delete current game files without completing
+    public void deleteCurrentGameFiles() {
+        File currentFolder = new File(basePath + "/current");
+        if(currentFolder.exists() && currentFolder.isDirectory()) {
+            File[] files = currentFolder.listFiles();
+            if(files != null) {
+                for(File file : files) {
+                    file.delete();
+                }
+            }
+        }
     }
 
     private boolean checkUnfinishedGame() {
@@ -169,6 +192,13 @@ public class GameController implements Viewable {
             return false;
         }
 
+        // Check if we have a log file with any entries
+        File logFile = new File(currentFolder, "log.txt");
+        if(logFile.exists() && logFile.length() > 0) {
+            return true;
+        }
+
+        // Also check if we have a game file (initial board)
         File gameFile = new File(currentFolder, "game.csv");
         return gameFile.exists() && gameFile.length() > 0;
     }
@@ -226,9 +256,36 @@ public class GameController implements Viewable {
             throw new NotFoundException("No unfinished game found");
         }
 
-        int[][] board = loadBoardFromFile(gameFile);
-        Game game = new Game(board, null);
+        // Load the initial board from file (original clues only)
+        int[][] initialBoard = loadBoardFromFile(gameFile);
+
+        // Create game with original clues as fixed cells
+        Game game = new Game(initialBoard, null);
         this.currentGame = game;
+
+        // Apply log file to restore ALL user moves
+        File logFile = new File(basePath + "/current/log.txt");
+        if(logFile.exists() && logFile.length() > 0) {
+            List<String> logEntries = Files.readAllLines(logFile.toPath());
+            for(String entry : logEntries) {
+                // Parse log entry: (row, col, value, previousValue)
+                entry = entry.replaceAll("[()]", "");
+                String[] parts = entry.split(", ");
+                if(parts.length == 4) {
+                    try {
+                        int row = Integer.parseInt(parts[0].trim());
+                        int col = Integer.parseInt(parts[1].trim());
+                        int value = Integer.parseInt(parts[2].trim());
+
+                        // Update the cell value in current board
+                        game.setCellValue(row, col, value);
+                    } catch (NumberFormatException e) {
+                        System.err.println("Invalid log entry: " + entry);
+                    }
+                }
+            }
+        }
+
         return game;
     }
 
@@ -243,5 +300,32 @@ public class GameController implements Viewable {
     public boolean[] getCatalogAsBooleans() {
         Catalog catalog = getCatalog();
         return new boolean[]{catalog.isHasUnfinished(), catalog.isAllModesExist()};
+    }
+
+    // Helper method to clear all game folders
+    private void clearAllGameFolders() {
+        String[] difficulties = {"easy", "medium", "hard"};
+        for (String difficulty : difficulties) {
+            File folder = new File(basePath + "/" + difficulty);
+            if(folder.exists() && folder.isDirectory()) {
+                File[] files = folder.listFiles();
+                if(files != null) {
+                    for(File file : files) {
+                        file.delete();
+                    }
+                }
+            }
+        }
+
+        // Clear current folder
+        File currentFolder = new File(basePath + "/current");
+        if(currentFolder.exists() && currentFolder.isDirectory()) {
+            File[] files = currentFolder.listFiles();
+            if(files != null) {
+                for(File file : files) {
+                    file.delete();
+                }
+            }
+        }
     }
 }
