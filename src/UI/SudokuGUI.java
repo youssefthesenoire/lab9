@@ -144,7 +144,7 @@ public class SudokuGUI extends JPanel {
                 currentGame.getDifficulty().toString() : "Unfinished";
         JLabel difficultyLabel = new JLabel("Game Mode: " + difficulty);
         difficultyLabel.setFont(new Font("Arial", Font.BOLD, 14));
-        JLabel emptyCellsLabel = new JLabel("Empty cells: " + currentGame.getEmptyCellCount());
+        JLabel emptyCellsLabel = new JLabel("Empty cells when started: " + currentGame.getEmptyCellCount());
         emptyCellsLabel.setFont(new Font("Arial", Font.PLAIN, 14));
         infoPanel.add(difficultyLabel, BorderLayout.WEST);
         infoPanel.add(emptyCellsLabel, BorderLayout.EAST);

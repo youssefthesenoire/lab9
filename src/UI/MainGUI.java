@@ -34,10 +34,6 @@ public class MainGUI extends JFrame {
         controller = new ControllerFacade(gameController);
 
         initializeUI();
-
-        if (musicEnabled) {
-            musicPlayer.playStartingMusic();
-        }
     }
 
     private void initializeUI() {
@@ -111,17 +107,17 @@ public class MainGUI extends JFrame {
         JButton easyButton = createStyledButton("  EASY  - 10 empty cells", new Color(100, 200, 100));
         JButton mediumButton = createStyledButton("  MEDIUM - 20 empty cells", new Color(255, 200, 50));
         JButton hardButton = createStyledButton("  HARD  - 25 empty cells", new Color(255, 100, 100));
-      //  JButton loadButton = createStyledButton("  LOAD A SOLVED SUDOKU", new Color(150, 150, 150));
+        JButton backButton = createStyledButton("  LOAD A SOLVED SUDOKU", new Color(150, 150, 150));
 
         easyButton.addActionListener(e -> loadGameByDifficulty('E'));
         mediumButton.addActionListener(e -> loadGameByDifficulty('M'));
         hardButton.addActionListener(e -> loadGameByDifficulty('H'));
-       // loadButton.addActionListener(e -> loadSolvedSudoku());
+        backButton.addActionListener(e -> loadSolvedSudoku());
 
         buttonPanel.add(easyButton);
         buttonPanel.add(mediumButton);
         buttonPanel.add(hardButton);
-      //  buttonPanel.add(loadButton);
+        buttonPanel.add(backButton);
 
         selectionPanel.add(titleLabel, BorderLayout.CENTER);
         selectionPanel.add(buttonPanel, BorderLayout.SOUTH);
@@ -129,6 +125,9 @@ public class MainGUI extends JFrame {
         add(selectionPanel);
         revalidate();
         repaint();
+        if (musicEnabled && musicPlayer != null) {
+            musicPlayer.playStartingMusic();
+        }
     }
 
     private void loadGameByDifficulty(char difficultyChar) {
@@ -178,9 +177,9 @@ public class MainGUI extends JFrame {
         centerPanel.setOpaque(false);
 
         JLabel instructionLabel = new JLabel(
-                "<html><center>No games found in storage.<br>" +
-                        "Please load a fully solved Sudoku CSV file to generate games.<br><br>" +
-                        "The file must be 9x9 with numbers 1-9.</center></html>");
+                "\t\t\tNo games found in storage.\n" +
+                        "\t\t\tPlease load a fully solved Sudoku CSV file to generate games\n" +
+                        "\t\t\tThe file must be 9x9 with numbers 1-9.\n");
         instructionLabel.setFont(new Font("Arial", Font.PLAIN, 14));
         instructionLabel.setForeground(Color.BLACK);
 
@@ -200,10 +199,12 @@ public class MainGUI extends JFrame {
 
         loadPanel.add(titleLabel, BorderLayout.NORTH);
         loadPanel.add(centerPanel, BorderLayout.CENTER);
-
         add(loadPanel);
         revalidate();
         repaint();
+        if (musicEnabled && musicPlayer != null) {
+            musicPlayer.playStartingMusic();
+        }
     }
 
     private void loadSolvedSudoku() {
@@ -244,14 +245,11 @@ public class MainGUI extends JFrame {
 
     private void loadGameUI(Game game, String title) {
         getContentPane().removeAll();
-
         sudokuGUI = new SudokuGUI(controller, gameController, game, this, musicPlayer, musicEnabled);
         add(sudokuGUI);
-
         setTitle("Sudoku Game - " + title);
         revalidate();
         repaint();
-
         if (musicEnabled && musicPlayer != null) {
             musicPlayer.playInGameMusic();
         }
@@ -293,14 +291,11 @@ public class MainGUI extends JFrame {
                     JOptionPane.QUESTION_MESSAGE);
 
             if(option == JOptionPane.YES_OPTION) {
-                // Game is auto-saved via log, just exit
                 disposeAndCleanup();
             } else if(option == JOptionPane.NO_OPTION) {
-                // Delete current game files
                 gameController.deleteCurrentGameFiles();
                 disposeAndCleanup();
             }
-            // Cancel - do nothing
         } else {
             disposeAndCleanup();
         }
