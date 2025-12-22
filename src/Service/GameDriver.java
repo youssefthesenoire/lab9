@@ -34,7 +34,7 @@ public class GameDriver {
             throw new SolutionInvalidException("Source solution is " + result.getState() +
                     ". Must be a fully valid Sudoku board.");
         }
-        
+
         generateGamesFromValidBoard(sourceBoard);
     }
 
@@ -42,8 +42,7 @@ public class GameDriver {
         clearFolder("easy");
         clearFolder("medium");
         clearFolder("hard");
-
-        // Generate three difficulty levels at once
+        
         generateAndSaveGame(sourceBoard, Difficulty.EASY, 10);
         generateAndSaveGame(sourceBoard, Difficulty.MEDIUM, 20);
         generateAndSaveGame(sourceBoard, Difficulty.HARD, 25);
