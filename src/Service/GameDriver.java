@@ -26,10 +26,8 @@ public class GameDriver {
     }
 
     public void generateGamesFromSolution(String sourceFilePath) throws SolutionInvalidException, IOException {
-        // Load the source solution
         int[][] sourceBoard = loadBoardFromCSV(sourceFilePath);
-
-        // Verify the source solution
+        
         VerificationResult result = SequentialVerifier.verify(sourceBoard);
 
         if(result.getState() != GameState.VALID) {
