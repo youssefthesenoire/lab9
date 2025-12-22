@@ -87,7 +87,6 @@ public class MainGUI extends JFrame {
                 showDifficultySelection();
             }
         } else {
-            // User chose not to continue, delete current game files
             gameController.deleteCurrentGameFiles();
             showDifficultySelection();
         }
@@ -111,17 +110,14 @@ public class MainGUI extends JFrame {
         JButton easyButton = createStyledButton("  EASY  - 10 empty cells", new Color(100, 200, 100));
         JButton mediumButton = createStyledButton("  MEDIUM - 20 empty cells", new Color(255, 200, 50));
         JButton hardButton = createStyledButton("  HARD  - 25 empty cells", new Color(255, 100, 100));
-      //  JButton loadButton = createStyledButton("  LOAD A SOLVED SUDOKU", new Color(150, 150, 150));
 
         easyButton.addActionListener(e -> loadGameByDifficulty('E'));
         mediumButton.addActionListener(e -> loadGameByDifficulty('M'));
         hardButton.addActionListener(e -> loadGameByDifficulty('H'));
-       // loadButton.addActionListener(e -> loadSolvedSudoku());
 
         buttonPanel.add(easyButton);
         buttonPanel.add(mediumButton);
         buttonPanel.add(hardButton);
-      //  buttonPanel.add(loadButton);
 
         selectionPanel.add(titleLabel, BorderLayout.CENTER);
         selectionPanel.add(buttonPanel, BorderLayout.SOUTH);
@@ -293,14 +289,11 @@ public class MainGUI extends JFrame {
                     JOptionPane.QUESTION_MESSAGE);
 
             if(option == JOptionPane.YES_OPTION) {
-                // Game is auto-saved via log, just exit
                 disposeAndCleanup();
             } else if(option == JOptionPane.NO_OPTION) {
-                // Delete current game files
                 gameController.deleteCurrentGameFiles();
                 disposeAndCleanup();
             }
-            // Cancel - do nothing
         } else {
             disposeAndCleanup();
         }
