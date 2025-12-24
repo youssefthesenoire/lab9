@@ -9,12 +9,39 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class SudokuSolver {
+    public static final class CellPosition {
+        private static final CellPosition[][] CACHE = new CellPosition[9][9];
+
+        static {
+            for (int r = 0; r < 9; r++) {
+                for (int c = 0; c < 9; c++) {
+                    CACHE[r][c] = new CellPosition(r, c);
+                }
+            }
+        }
+
+        public static CellPosition of(int row, int col) {
+            return CACHE[row][col];
+        }
+
+        public final int row;
+        public final int col;
+        public final int box;
+
+        private CellPosition(int row, int col) {
+            this.row = row;
+            this.col = col;
+            this.box = (row / 3) * 3 + (col / 3);
+        }
+    }
+
     private static class BoardContext {
         private final int[][] board;
-        private final List<EmptyCell> emptyCells;
+        private final List<CellPosition> emptyCells;
         private final List<Integer>[] rowEmptyIndices;
         private final List<Integer>[] colEmptyIndices;
         private final List<Integer>[] boxEmptyIndices;
+
         @SuppressWarnings("unchecked")
         public BoardContext(int[][] board) {
             this.board = board;
@@ -31,11 +58,11 @@ public class SudokuSolver {
                 for (int j = 0; j < 9; j++) {
                     if (board[i][j] == 0) {
                         int index = emptyCells.size();
-                        emptyCells.add(new EmptyCell(i, j));
+                        CellPosition cell = CellPosition.of(i, j);
+                        emptyCells.add(cell);
                         rowEmptyIndices[i].add(index);
                         colEmptyIndices[j].add(index);
-                        int boxIndex = (i / 3) * 3 + (j / 3);
-                        boxEmptyIndices[boxIndex].add(index);
+                        boxEmptyIndices[cell.box].add(index);
                     }
                 }
             }
@@ -43,44 +70,45 @@ public class SudokuSolver {
                 throw new IllegalArgumentException("Solver works only for exactly 5 empty cells");
             }
         }
-        public List<EmptyCell> getEmptyCells() {
+
+        public List<CellPosition> getEmptyCells() {
             return emptyCells;
         }
+
         public int getValue(int row, int col) {
             return board[row][col];
         }
+
         public List<Integer> getEmptyCellsInRow(int row) {
             return rowEmptyIndices[row];
         }
+
         public List<Integer> getEmptyCellsInColumn(int col) {
             return colEmptyIndices[col];
         }
+
         public List<Integer> getEmptyCellsInBox(int box) {
             return boxEmptyIndices[box];
         }
     }
-    private static class EmptyCell {
-        final int row;
-        final int col;
-        EmptyCell(int row, int col) {
-            this.row = row;
-            this.col = col;
-        }
-    }
+
     private static class PermutationIterator implements Iterator<int[]> {
         private final int size;
         private final int[] current;
         private boolean hasNext;
+
         public PermutationIterator(int size) {
             this.size = size;
             this.current = new int[size];
             Arrays.fill(current, 1);
             this.hasNext = true;
         }
+
         @Override
         public boolean hasNext() {
             return hasNext;
         }
+
         @Override
         public int[] next() {
             if (!hasNext) {
@@ -100,10 +128,10 @@ public class SudokuSolver {
             if (i < 0) {
                 hasNext = false;
             }
-
             return result;
         }
     }
+
     private static class VerificationWorker implements Runnable {
         private final BoardContext context;
         private final int[] combination;
@@ -124,13 +152,10 @@ public class SudokuSolver {
         @Override
         public void run() {
             try {
-                if (solutionFound.get()) {
-                    return;
-                }
+                if (solutionFound.get()) return;
                 if (isValidCombination(context, combination)) {
                     if (!solutionFound.getAndSet(true)) {
-                        int[] encodedSolution = encodeSolution(context.getEmptyCells(), combination);
-                        solution.set(encodedSolution);
+                        solution.set(encodeSolution(context.getEmptyCells(), combination));
                     }
                 }
             } finally {
@@ -138,10 +163,9 @@ public class SudokuSolver {
             }
         }
     }
+
     public static int[] solve(Game game) throws InvalidGameException {
-        if (game.getEmptyCellCount() != 5) {
-            throw new InvalidGameException("Solver only works for exactly 5 empty cells");
-        }
+        if (game.getEmptyCellCount() != 5) throw new InvalidGameException("Solver only works for exactly 5 empty cells");
         BoardContext context = new BoardContext(game.getBoard());
         AtomicBoolean solutionFound = new AtomicBoolean(false);
         AtomicReference<int[]> solution = new AtomicReference<>();
@@ -152,59 +176,43 @@ public class SudokuSolver {
         try {
             List<Future<?>> futures = new ArrayList<>();
             CountDownLatch latch = new CountDownLatch(0);
-
             int batchCounter = 0;
             final int BATCH_SIZE = 50;
             while (iterator.hasNext() && !solutionFound.get()) {
                 int[] combination = iterator.next();
                 if (batchCounter % BATCH_SIZE == 0) {
-                    latch = new CountDownLatch(Math.min(BATCH_SIZE,
-                            countRemainingCombinations(iterator) + 1));
+                    latch = new CountDownLatch(Math.min(BATCH_SIZE, countRemainingCombinations(iterator) + 1));
                 }
-                VerificationWorker worker = new VerificationWorker(
-                        context, combination, solutionFound, solution, latch);
-
-                Future<?> future = executor.submit(worker);
-                futures.add(future);
+                VerificationWorker worker = new VerificationWorker(context, combination, solutionFound, solution, latch);
+                futures.add(executor.submit(worker));
                 batchCounter++;
                 if (batchCounter % BATCH_SIZE == 0 || solutionFound.get()) {
-                    if (solutionFound.get()) {
-                        cancelRemainingFutures(futures);
-                    }
-                    try {
-                        latch.await(10, TimeUnit.SECONDS);
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                        throw new InvalidGameException("Solver interrupted");
-                    }
+                    if (solutionFound.get()) cancelRemainingFutures(futures);
+                    latch.await(10, TimeUnit.SECONDS);
                     futures.clear();
                 }
             }
             executor.shutdown();
-            if (!executor.awaitTermination(30, TimeUnit.SECONDS)) {
-                executor.shutdownNow();
-            }
+            if (!executor.awaitTermination(30, TimeUnit.SECONDS)) executor.shutdownNow();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new InvalidGameException("Solver interrupted: " + e.getMessage());
+            throw new InvalidGameException("Solver interrupted");
         } finally {
             executor.shutdownNow();
         }
         int[] result = solution.get();
-        if (result != null) {
-            return result;
-        } else {
-            throw new InvalidGameException("No solution found for the board");
-        }
+        if (result != null) return result;
+        throw new InvalidGameException("No solution found for the board");
     }
+
     private static int countRemainingCombinations(PermutationIterator iterator) {
         return 100;
     }
+
     private static void cancelRemainingFutures(List<Future<?>> futures) {
-        for (Future<?> future : futures) {
-            future.cancel(true);
-        }
+        for (Future<?> future : futures) future.cancel(true);
     }
+
     private static boolean isValidCombination(BoardContext context, int[] combination) {
         for (int row = 0; row < 9; row++) {
             boolean[] seen = new boolean[10];
@@ -219,7 +227,6 @@ public class SudokuSolver {
                     seen[value] = true;
                 }
             }
-
             if (!valid) continue;
             for (int emptyIndex : context.getEmptyCellsInRow(row)) {
                 int value = combination[emptyIndex];
@@ -231,7 +238,6 @@ public class SudokuSolver {
                     seen[value] = true;
                 }
             }
-
             if (!valid) return false;
         }
         for (int col = 0; col < 9; col++) {
@@ -247,7 +253,6 @@ public class SudokuSolver {
                     seen[value] = true;
                 }
             }
-
             if (!valid) continue;
             for (int emptyIndex : context.getEmptyCellsInColumn(col)) {
                 int value = combination[emptyIndex];
@@ -259,7 +264,6 @@ public class SudokuSolver {
                     seen[value] = true;
                 }
             }
-
             if (!valid) return false;
         }
         for (int box = 0; box < 9; box++) {
@@ -293,28 +297,24 @@ public class SudokuSolver {
                     seen[value] = true;
                 }
             }
-
             if (!valid) return false;
         }
-
         return true;
     }
-    private static int[] encodeSolution(List<EmptyCell> emptyCells, int[] combination) {
+
+    private static int[] encodeSolution(List<CellPosition> emptyCells, int[] combination) {
         int[] encoded = new int[emptyCells.size()];
         for (int i = 0; i < emptyCells.size(); i++) {
-            EmptyCell cell = emptyCells.get(i);
+            CellPosition cell = emptyCells.get(i);
             encoded[i] = cell.row * 81 + cell.col * 9 + (combination[i] - 1);
         }
         return encoded;
     }
-    public static int[] solveSequential(Game game) throws InvalidGameException {
-        if (game.getEmptyCellCount() != 5) {
-            throw new InvalidGameException("Solver only works for exactly 5 empty cells");
-        }
 
+    public static int[] solveSequential(Game game) throws InvalidGameException {
+        if (game.getEmptyCellCount() != 5) throw new InvalidGameException("Solver only works for exactly 5 empty cells");
         BoardContext context = new BoardContext(game.getBoard());
         PermutationIterator iterator = new PermutationIterator(5);
-
         while (iterator.hasNext()) {
             int[] combination = iterator.next();
             if (isValidCombination(context, combination)) {
